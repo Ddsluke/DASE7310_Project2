@@ -19,18 +19,18 @@
 
 ## 目录 / Contents
 
-- [一句话 / At a glance](#0-一句话--at-a-glance)
-- [快速开始 / Quick start](#1-快速开始--quick-start)
-- [仓库文件导引 / Repository map](#2-仓库文件导引--repository-map)
-- [计划 / Plan](#3-计划--plan双语)
-- [每周思路 / Weekly methodology](#4-每周思路--weekly-methodology双语)
-- [结果位置 / Where to find results](#5-结果位置--where-to-find-results双语)
-- [数据 / Data](#6-数据--data双语)
-- [课程 benchmark 速查](#7-课程-benchmark-速查--course-benchmark-quick-reference)
-- [提交前检查清单](#8-提交前检查清单--pre-submission-checklist)
-- [常见坑 / Common pitfalls](#9-常见坑--common-pitfalls)
-- [环境 / Environment](#10-环境--environment)
-- [文档阅读顺序 / Reading order](#11-文档阅读顺序--reading-order)
+- [一句话 / At a glance](#user-content-0-一句话--at-a-glance)
+- [快速开始 / Quick start](#user-content-1-快速开始--quick-start)
+- [仓库文件导引 / Repository map](#user-content-2-仓库文件导引--repository-map)
+- [计划 / Plan](#user-content-3-计划--plan双语)
+- [每周思路 / Weekly methodology](#user-content-4-每周思路--weekly-methodology双语)
+- [结果位置 / Where to find results](#user-content-5-结果位置--where-to-find-results双语)
+- [数据 / Data](#user-content-6-数据--data双语)
+- [课程 benchmark 速查](#user-content-7-课程-benchmark-速查--course-benchmark-quick-reference)
+- [提交前检查清单](#user-content-8-提交前检查清单--pre-submission-checklist)
+- [常见坑 / Common pitfalls](#user-content-9-常见坑--common-pitfalls)
+- [环境 / Environment](#user-content-10-环境--environment)
+- [文档阅读顺序 / Reading order](#user-content-11-文档阅读顺序--reading-order)
 
 ---
 
@@ -245,7 +245,7 @@ cd D:\Backup\Documents\dase7310\DASE7310_GP2_Repo
 **完整公式、主表、报告写法**：[BENCHMARKS_ZH.md](BENCHMARKS_ZH.md)（中文）。
 **Full formulas, tables and report-ready English**: [README_EN.md](README_EN.md) Section 6.
 
-> **Lecture 5–7 不是 GP2 benchmark**：它们是衍生品/固定收益（对冲、利率、期货、期权），主要服务 final exam 和 presentation。详见 [BENCHMARKS_ZH.md 第 8 节](BENCHMARKS_ZH.md#8-lecture-57-与-gp2-的关系已逐页检查)。
+> **Lecture 5–7 不是 GP2 benchmark**：它们是衍生品/固定收益（对冲、利率、期货、期权），主要服务 final exam 和 presentation。详见 [BENCHMARKS_ZH.md 第 8 节](BENCHMARKS_ZH.md#user-content-8-lecture-57-与-gp2-的关系已逐页检查)。
 
 ---
 
