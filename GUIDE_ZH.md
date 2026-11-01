@@ -272,7 +272,10 @@ cd D:\Backup\Documents\dase7310\DASE7310_GP2_Repo
 | `WEEK2_GUIDANCE_ZH.md` | 第二周行动指南（CAPM 观点） |
 | `WEEK3_GUIDANCE_ZH.md` | 第三周行动指南（信号观点） |
 | `WEEK1_REPORT_EN.md` | 第一周英文报告（内部总结，非最终提交版） |
+| `TEAM_GUIDANCE_ZH.md` | 队友执行指南（规则、流程、分工、AI prompt） |
+| `BENCHMARKS_ZH.md` | 课程六类 benchmark 的对照与报告写法 |
 | `research_gmv.py` | 复现协方差与 GMV 的脚本 |
 | `research_views.py` | 复现“无观点 → 有观点”权重变化的脚本 |
+| `research_benchmarks.py` | 复现课程 benchmark 对比、有效前沿、两基金检查 |
 | `ledger.md` | 周度实际收益台账（只追加） |
 | `README.md` | 英文版完整说明（规则、数据、流程、方法） |

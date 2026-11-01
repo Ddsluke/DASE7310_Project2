@@ -240,22 +240,116 @@ more portfolio risk than its capital weight alone suggests.
 
 ---
 
-## 6. Backtest and benchmark comparison
+## 6. Course benchmark comparison
+
+The project brief asks for a comparison with **the benchmark methods covered in class**.
+Lectures 2–4 define six benchmark families: equal weight (1/N), the global minimum
+variance portfolio, the mean-variance efficient frontier, the tangency / maximum-Sharpe
+portfolio, the two-fund theorem, and the CAPM / market portfolio. The full mapping,
+formulas and report-ready text are in `BENCHMARKS_ZH.md`; this section summarises the
+results.
 
 **Protocol.** Weekly rebalancing, 2021-01-08 to 2026-10-30, 296 weeks, hfq total
-returns, gross of transaction costs, same 104-week covariance and 1%/25% constraints
-for every strategy.
+returns, gross of transaction costs. Sharpe ratios use the course definition
+`(annual return − 2%) / annual volatility`. The long-only methods use a 104-week
+covariance with 30% shrinkage and 1%/25% caps; the “unconstrained” rows use the course
+formula and are shown separately.
 
-| Strategy | Ann. return | Ann. vol | Sharpe | Max drawdown | Active vs EW | 4-week 5th pct |
-|---|---:|---:|---:|---:|---:|---:|
-| **GMV (Week 1)** | **8.39%** | **8.41%** | **1.00** | **−11.3%** | **+1.93%** | **−3.1%** |
-| Equal weight | 5.31% | 16.23% | 0.40 | −33.0% | 0.00% | −6.2% |
-| Signal tilt, k = 2 | 10.79% | 11.92% | 0.92 | −15.0% | +4.48% | −4.2% |
-| Signal tilt, k = 3 | 11.47% | 11.92% | 0.97 | −13.5% | +5.09% | −4.2% |
-| Top-4 momentum | 9.90% | 13.41% | 0.77 | −23.2% | +3.86% | −4.6% |
-| Tangency (sample means) | 4.64% | 12.82% | 0.42 | −31.5% | −1.12% | −5.6% |
+### 6.1 Main comparison
 
-### 6.1 Sub-period stability
+| Method | Course link | Constraints | Ann. ret | Ann. vol | Sharpe | Max DD | Active vs EW |
+|---|---|---|---:|---:|---:|---:|---:|
+| **Signal (proposed)** | characteristic view | long-only 1–25% | **8.70%** | **8.41%** | **0.80** | **−11.6%** | **+2.22%** |
+| GMV_uncon | Lecture 2/3 formula | shorts allowed | 8.13% | 7.89% | 0.78 | −10.7% | +1.65% |
+| GMV_con | Lecture 2/3 + constraints | long-only 1–25% | 8.39% | 8.41% | 0.76 | −11.3% | +1.93% |
+| Tilt k=2 (robustness) | direct signal tilt | long-only | 10.79% | 11.92% | 0.74 | −15.0% | +4.48% |
+| CAPM_con | Lecture 4 CAPM/SML | long-only 1–25% | 8.03% | 8.50% | 0.71 | −12.5% | +1.61% |
+| Top-4 (robustness) | concentrated signal | long-only | 9.90% | 13.41% | 0.59 | −23.2% | +3.86% |
+| Tangency_uncon_cap2 | Lecture 3 + gross≤2 | shorts, gross≤2 | 10.44% | 14.71% | 0.57 | −27.3% | +4.53% |
+| Tangency_con | Lecture 3 + clips | long-short, w ∈ [−10%, 40%] | 8.26% | 14.25% | 0.44 | −30.3% | +2.48% |
+| Equal weight | Lecture 2, 1/N | long-only | 5.31% | 16.23% | 0.20 | −33.0% | 0 |
+| Market (HSI) | Lecture 4 market proxy | passive index | −3.76% | 22.25% | −0.26 | −49.3% | −7.85% |
+
+The proposed signal portfolio has the highest Sharpe ratio in the group and a maximum
+drawdown close to GMV, while equal weight has the worst risk-adjusted performance. The
+CAPM portfolio adds only a small tilt and does not improve on GMV in this sample; this
+is an honest result and motivates the switch to the signal view in Week 3.
+
+### 6.2 Position on the efficient frontier
+
+The long-only frontier is computed at the 30 October 2026 cutoff using the same 104-week
+sample mean and covariance. The “efficiency gap” is the portfolio's expected return
+minus the frontier return at the same volatility (in-sample).
+
+| Method | Expected return | Volatility | Frontier return at same vol | Gap |
+|---|---:|---:|---:|---:|
+| Equal weight | 15.31% | 14.31% | 22.69% | **−7.38%** |
+| GMV_con | 15.29% | 7.86% | 15.39% | **−0.10%** |
+| Signal_con | 15.48% | 7.91% | 15.71% | **−0.22%** |
+| CAPM_con | 15.16% | 7.90% | 15.66% | **−0.50%** |
+| GMV_uncon | 14.41% | 7.33% | 15.36% | −0.94% |
+| Tilt k=2 | 15.34% | 8.05% | 16.48% | −1.14% |
+| Top-4 | 15.19% | 10.07% | 20.32% | −5.13% |
+| Tangency_con | 20.51% | 10.06% | 20.31% | +0.20%* |
+| Tangency_uncon_cap2 | 20.57% | 10.09% | 20.36% | +0.22%* |
+
+\* The tangency rows allow short positions, so they can lie slightly **above** the
+long-only frontier. Part of the positive 0.2pp gap is the shorting effect and part is
+grid interpolation error (the frontier is evaluated on 15 target-return points). They
+are not directly comparable with the long-only methods.
+
+The constrained GMV, the CAPM portfolio and the proposed signal portfolio lie within
+0.1–0.5 percentage points of the frontier. Equal weight lies 7.4 percentage points
+below it. This is direct evidence that equal weight is not an efficient portfolio and
+that the proposed method is close to the frontier. The comparison is in-sample: the
+frontier uses the same 104-week moments as the portfolios, so it is an illustration,
+not an out-of-sample performance claim.
+
+### 6.3 Two-fund theorem check
+
+Lecture 3's two-fund theorem says that any efficient portfolio can be written as a
+combination of two efficient portfolios. We decompose each method as
+`α · GMV + (1 − α) · gross-capped tangency`, choosing α to match its expected return:
+
+| Method | α (GMV) | L1 weight distance | Method vol | Two-fund vol |
+|---|---:|---:|---:|---:|
+| GMV_con | 1.013 | **0.046** | 7.86% | 7.84% |
+| CAPM_con | 1.039 | **0.104** | 7.90% | 7.83% |
+| Signal_con | 0.975 | **0.174** | 7.91% | 7.86% |
+| Equal weight | 1.010 | **0.897** | 14.31% | 7.84% |
+
+The proposed portfolios are close to the GMV–tangency span (L1 distance 0.05–0.17),
+while equal weight is far from it (0.90). The theorem holds exactly only without
+constraints; our implementation is long-only with 1%/25% caps, so this is an
+approximate check.
+
+### 6.4 The unconstrained tangency portfolio
+
+The textbook tangency formula `x* ∝ Σ⁻¹(μ − r_f)` is mathematically correct, but with
+sample means and a nearly singular covariance matrix it is not implementable. Over the
+backtest it has an average gross exposure of **34.75**, an annualised volatility of
+**363.7%**, a worst week of **−652%**, and an annualised return of **−11.2%**. We
+therefore report a gross-capped version (gross ≤ 2) and a long-only version in the main
+table, and keep the raw version as a diagnostic. This is a direct illustration of
+Markowitz estimation error, and it is the reason the Week 1 portfolio starts from GMV
+rather than from a sample-mean tangency portfolio.
+
+### 6.5 Tail behaviour
+
+Over rolling four-week windows:
+
+| Strategy | Median | 5th percentile | P(return < −5%) | P(return > +5%) |
+|---|---:|---:|---:|---:|
+| Signal_con | 0.37% | −2.88% | 1.02% | 4.78% |
+| GMV_con | 0.33% | −3.12% | 0.68% | 5.12% |
+| Equal weight | 0.06% | −6.22% | 10.24% | 13.99% |
+
+GMV and the signal portfolio roughly halve the left tail of equal weight, at the cost
+of a thinner right tail. For a four-week competition in which the downside is a
+B-range grade and the upside is a top-three finish, this is a deliberate trade-off:
+Week 1 prioritises not blowing up while the group establishes its process.
+
+### 6.6 Sub-period stability
 
 | Period | GMV return | EW return | GMV Sharpe | EW Sharpe |
 |---|---:|---:|---:|---:|
@@ -263,23 +357,11 @@ for every strategy.
 | 2024–2026 (strong rebound) | 16.97% | 18.06% | 1.76 | 1.06 |
 | Full sample | 8.39% | 5.31% | 1.00 | 0.40 |
 
-GMV beat equal weight in the weak 2021–23 period but lagged slightly in the 2024–26
-rally. This is the expected pattern for a defensive portfolio: it protects capital in
-drawdowns and gives up some upside in strong rebounds.
-
-### 6.2 Tail behaviour
-
-Over rolling four-week windows:
-
-| Strategy | Median | 5th percentile | P(return < −5%) | P(return > +5%) |
-|---|---:|---:|---:|---:|
-| GMV | 0.31% | −3.12% | 0.68% | 5.12% |
-| Equal weight | 0.06% | −6.22% | 10.24% | 13.99% |
-
-GMV roughly halves the left tail of equal weight, at the cost of a thinner right tail.
-For a four-week competition in which the downside is a B-range grade and the upside is
-a top-three finish, this is a deliberate trade-off: Week 1 prioritises not blowing up
-while the group establishes its process.
+These sub-period figures come from `research_backtest.py` (Sharpe computed with
+`r_f = 0`), so they are not directly comparable with the main table above; they are
+shown to illustrate regime stability. GMV beat equal weight in the weak 2021–23 period
+and lagged slightly in the 2024–26 rally, the expected pattern for a defensive
+portfolio.
 
 ---
 
@@ -378,6 +460,11 @@ Key files:
 | `research/gmv_weights.csv` | Unconstrained vs constrained GMV weights and risk contributions |
 | `research/shrinkage_sensitivity.csv` | GMV weights across shrinkage intensity |
 | `research/backtest_summary.csv` | Strategy performance, full sample and sub-periods |
+| `research/benchmark_summary.csv` | Course benchmark comparison (1/N, GMV, tangency, CAPM, HSI) |
+| `research/frontier_20261030.csv` | Long-only efficient frontier at the cutoff |
+| `research/frontier_points.csv` | Where each method sits vs the frontier |
+| `research/two_fund_check.csv` | Two-fund theorem check |
+| `BENCHMARKS_ZH.md` | Full mapping of the six course benchmark families and report-ready text |
 
 ---
 

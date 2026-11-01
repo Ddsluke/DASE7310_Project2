@@ -79,7 +79,10 @@ research_portfolios.py        tilt / top-k / GMV comparison
 research_backtest.py          walk-forward backtest of all production strategies
 research_gmv.py               covariance matrix + GMV step-by-step (teaching/repro)
 research_views.py             from no-view GMV to mean-variance views (CAPM / signal)
+research_benchmarks.py        course benchmark comparison, frontier, two-fund check
 GUIDE_ZH.md                   Chinese Week 1 action guide
+TEAM_GUIDANCE_ZH.md           full team playbook (rules, workflow, benchmarks, roles)
+BENCHMARKS_ZH.md              course benchmark mapping and comparison
 WEEK1_REPORT_EN.md            English Week 1 report (internal, not the final submission)
 WEEK2_GUIDANCE_ZH.md          Week 2 guide: CAPM equilibrium view
 WEEK3_GUIDANCE_ZH.md          Week 3 guide: signal view
@@ -108,6 +111,12 @@ research/
   gmv_weights.csv             unconstrained vs constrained GMV weights + risk contributions
   shrinkage_sensitivity.csv   GMV weights across shrinkage intensity (0-100%)
   views_frontier.csv          weights for sample-mean / CAPM / signal views at several lambda
+  benchmark_summary.csv       course benchmark performance (1/N, GMV, tangency, CAPM, HSI)
+  benchmark_4w_distribution.csv
+  benchmark_final_weights.csv
+  frontier_20261030.csv       long-only efficient frontier at the final cutoff
+  frontier_points.csv         where each method sits vs the frontier
+  two_fund_check.csv          two-fund theorem check
   backtest_summary.csv        full / 2021-23 / 2024-26 performance by strategy
   backtest_4w_distribution.csv rolling 4-week return distribution
   week1_variants/             week-1 alternatives (EW, GMV, tilt k=1/3, top4)
@@ -153,9 +162,10 @@ start from the simplest result in the course and add one layer per week.
   Markowitz weights unstable.
 - 104-week covariance, 30% shrinkage to diagonal, single-name floor 1% / cap 25%,
   long-only. All 10 stocks are held.
-- Backtest (2021–2026, weekly, gross): 8.39% p.a., 8.41% vol, Sharpe 1.00, max DD
-  −11.3%; 4-week 5th percentile −3.1%. It beat EW in the weak 2021–23 period
-  (+3.7% vs +1.2%) but lagged in the 2024–26 rally (+17.0% vs +18.1%).
+- Backtest (2021–2026, weekly, gross): 8.39% p.a., 8.41% vol, Sharpe 0.76
+  (course definition, `r_f = 2%`), max DD −11.3%; 4-week 5th percentile −3.1%.
+  It beat EW in the weak 2021–23 period (+3.7% vs +1.2%) but lagged in the 2024–26
+  rally (+17.0% vs +18.1%).
 
 ### Week 2 — CAPM equilibrium view (Lecture 4)
 - Lecture 4: `mu_s = r_f + beta_s * market_premium`; beta estimated by regression on HSI.
@@ -192,42 +202,68 @@ tilts are clipped to zero, so large `k` mainly increases concentration.
 
 ## 6. Benchmark set for the report
 
-| Benchmark | Course link | Why include |
-|---|---|---|
-| Equal weight (1/10) | Lecture 2 diversification | The naive portfolio every group can replicate |
-| GMV (long-only) | Lecture 2/3 | Risk-only portfolio; our week-1 starting point |
-| Tangency / max Sharpe | Lecture 3 | Uses sample means; shows estimation error |
-| Top-4 momentum | — | Concentrated version of the signal |
-| Signal tilt (k = 1/2/3) | Lecture 3 + robust μ | Our proposed evolution |
+The project brief asks for a comparison with **the benchmark methods covered in class**.
+Lectures 2–4 define six benchmark families (full mapping, formulas and report-ready text
+in `BENCHMARKS_ZH.md`):
 
-Backtest table (`research/backtest_summary.csv`, 2021-01 → 2026-10, weekly, gross):
+| # | Benchmark | Course | Our implementation |
+|---|---|---|---|
+| 1 | Equal weight (1/N) | Lecture 2 | `EW` |
+| 2 | Global minimum variance | Lecture 2/3 | `GMV_uncon` (formula) / `GMV_con` (long-only 1–25%) |
+| 3 | Mean-variance efficient frontier | Lecture 3 | `frontier_20261030.csv`, `frontier_points.csv` |
+| 4 | Tangency / max Sharpe | Lecture 3 | `Tangency_uncon_cap2` (gross ≤ 2) / `Tangency_con` |
+| 5 | Two-fund theorem | Lecture 3 | `two_fund_check.csv` |
+| 6 | CAPM / SML / market portfolio | Lecture 4 | `CAPM_con`, `Market_HSI` |
 
-| Strategy | Ann. ret | Ann. vol | Sharpe | Max DD | Active vs EW | 4w p05 |
-|---|---:|---:|---:|---:|---:|---:|
-| GMV | 8.39% | 8.41% | 1.00 | −11.3% | +1.93% | −3.1% |
-| Tilt k=1 | 8.12% | 12.19% | 0.70 | −19.6% | +2.07% | −4.6% |
-| Tilt k=2 | 10.79% | 11.92% | 0.92 | −15.0% | +4.48% | −4.2% |
-| Tilt k=3 | 11.47% | 11.92% | 0.97 | −13.5% | +5.09% | −4.2% |
-| Top-4 | 9.90% | 13.41% | 0.77 | −23.2% | +3.86% | −4.6% |
-| Tangency | 4.64% | 12.82% | 0.42 | −31.5% | −1.12% | −5.6% |
-| Equal weight | 5.31% | 16.23% | 0.40 | −33.0% | 0 | −6.2% |
+Main table (`research/benchmark_summary.csv`, 2021-01 → 2026-10, weekly, gross,
+Sharpe with `r_f = 2%`):
 
-The 2024–26 sub-period is a strong bull market; 2021–23 is weak. GMV is the most
-stable across both (Sharpe 0.50 / 1.76), which is why it is the week-1 anchor. The
-tilt strategies have higher full-sample returns but rely on the recent regime.
+| Method | Course link | Ann. ret | Ann. vol | Sharpe | Max DD | Active vs EW |
+|---|---|---:|---:|---:|---:|---:|
+| **Signal (proposed)** | characteristic view | **8.70%** | **8.41%** | **0.80** | **−11.6%** | **+2.22%** |
+| GMV_uncon | Lecture 2/3 formula | 8.13% | 7.89% | 0.78 | −10.7% | +1.65% |
+| GMV_con | Lecture 2/3 + constraints | 8.39% | 8.41% | 0.76 | −11.3% | +1.93% |
+| Tilt k=2 | direct signal tilt | 10.79% | 11.92% | 0.74 | −15.0% | +4.48% |
+| CAPM_con | Lecture 4 CAPM/SML | 8.03% | 8.50% | 0.71 | −12.5% | +1.61% |
+| Top-4 | concentrated signal | 9.90% | 13.41% | 0.59 | −23.2% | +3.86% |
+| Tangency_uncon_cap2 | Lecture 3 + gross ≤ 2 | 10.44% | 14.71% | 0.57 | −27.3% | +4.53% |
+| Tangency_con | Lecture 3 + constraints | 8.26% | 14.25% | 0.44 | −30.3% | +2.48% |
+| Equal weight | Lecture 2, 1/N | 5.31% | 16.23% | 0.20 | −33.0% | 0 |
+| Market (HSI) | Lecture 4 market proxy | −3.76% | 22.25% | −0.26 | −49.3% | −7.85% |
+
+> `Tangency_con` is clipped but still allows small short positions
+> (`w ∈ [−10%, 40%]`), so it is not directly comparable with the long-only frontier.
+
+Two additional course-linked checks:
+
+- **Efficient frontier** (`research/frontier_points.csv`, in-sample 104w): GMV_con is
+  0.10pp below the frontier, Signal_con 0.22pp, CAPM_con 0.50pp, while EW is 7.38pp
+  below. The tangency portfolios are on the frontier within 0.2pp grid error.
+- **Two-fund theorem** (`research/two_fund_check.csv`): the L1 weight distance from the
+  GMV–tangency span is 0.046 for GMV_con, 0.104 for CAPM_con, 0.174 for Signal_con, and
+  0.897 for EW. The theorem is exact only without constraints; our implementation is
+  long-only with caps, so this is an approximate check.
+
+> The raw unconstrained tangency formula `Σ⁻¹(μ − r_f)` is **not implementable** with
+> sample means: average gross 34.8, 363.7% annualised volatility, −652% worst week. It is
+> kept as a diagnostic in `research/benchmark_diagnostics.csv` and is the clearest
+> illustration of why the Week 1 portfolio starts from GMV rather than from sample means.
 
 ---
 
 ## 7. Report / presentation material already collected
 
-- Method evolution chain: EW → GMV → shrunk-mean MV → signal tilt → adaptive rule.
+- Method evolution chain: GMV (no view) → CAPM (market view) → signal (relative view) →
+  adaptive (confidence update).
 - Signal IC by year (`research/scan_ic.csv`): momentum and near-52-week-high are
   positive in most years; 1-week reversal is not a reliable signal.
 - The 0981 (SMIC) case: 46–57% annualised vol, −32% in the four weeks to 30 Oct 2026.
   Any portfolio that overweights it bears a large idiosyncratic risk; GMV gives it
   only 1.7%.
-- Estimation error: the unconstrained tangency portfolio has a −31.5% max drawdown
-  and is the worst benchmark, a direct illustration of why shrinking means matters.
+- Estimation error: the raw unconstrained tangency formula has average gross 34.8,
+  363.7% annualised volatility and a −652% worst week; even the constrained version has
+  a −30.3% max drawdown. This is the clearest illustration of why shrinking means and
+  imposing constraints matters.
 - Regime dependence: 2021–23 vs 2024–26 rankings flip for several strategies; a
   single 20-week window would overstate progress (the same lesson as GP1).
 

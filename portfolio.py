@@ -228,11 +228,57 @@ def gmv_weights(ret: pd.DataFrame, win: int = 104, floor: float = 0.01,
     return w / w.sum()
 
 
-def tangency_weights(ret: pd.DataFrame, win: int = 104, cap: float = 0.40) -> pd.Series:
+def gmv_unconstrained(ret: pd.DataFrame, win: int = 104) -> pd.Series:
+    """课程 Lecture 2/3 的原始 GMV 闭式解（允许做空）：
+    x* = Σ⁻¹e / (e'Σ⁻¹e)
+    """
+    cov = shrink_cov(ret, win)
+    inv = np.linalg.inv(cov)
+    one = np.ones(len(STOCKS))
+    return pd.Series(inv @ one / (one @ inv @ one), index=STOCKS)
+
+
+def tangency_unconstrained(ret: pd.DataFrame, win: int = 104, rf: float = 0.02) -> pd.Series:
+    """课程 Lecture 3 slide 31 的切点组合（允许做空）：
+    x* ∝ Σ⁻¹ μ̃,  μ̃ = μ − r_f
+    归一化到 sum(x*) = 1。
+    """
     hist = ret.dropna()
     mu = hist.tail(win).mean().values * 52
     inv = np.linalg.pinv(shrink_cov(hist, win))
-    w = inv @ mu
+    w = inv @ (mu - rf)
+    if not np.isfinite(w).all() or abs(w.sum()) < 1e-10:
+        return pd.Series(1 / len(STOCKS), index=STOCKS)
+    return pd.Series(w / w.sum(), index=STOCKS)
+
+
+def frontier_weights(ret: pd.DataFrame, mu: pd.Series, target_return: float,
+                     floor: float = 0.01, cap: float = 0.25) -> pd.Series | None:
+    """有效前沿上的一个点：min w'Σw s.t. μ'w = target, 1'w = 1, floor<=w<=cap。"""
+    from scipy.optimize import minimize
+
+    cov = shrink_cov(ret, 104)
+    n = len(STOCKS)
+    cons = [
+        {"type": "eq", "fun": lambda w: w.sum() - 1},
+        {"type": "eq", "fun": lambda w: mu.values @ w - target_return},
+    ]
+    res = minimize(lambda w: w @ cov @ w, np.ones(n) / n, method="SLSQP",
+                   bounds=[(floor, cap)] * n, constraints=cons,
+                   options={"maxiter": 2000, "ftol": 1e-14})
+    if not res.success:
+        return None
+    w = pd.Series(res.x, index=STOCKS)
+    return w / w.sum()
+
+
+def tangency_weights(ret: pd.DataFrame, win: int = 104, cap: float = 0.40,
+                     rf: float = 0.02) -> pd.Series:
+    """切点组合的实现版（纯多头 + 上下限）。基于 Lecture 3 的 Σ⁻¹μ̃。"""
+    hist = ret.dropna()
+    mu = hist.tail(win).mean().values * 52
+    inv = np.linalg.pinv(shrink_cov(hist, win))
+    w = inv @ (mu - rf)
     if not np.isfinite(w).all() or abs(w.sum()) < 1e-8:
         return pd.Series(1 / len(STOCKS), index=STOCKS)
     w = w / w.sum()
@@ -299,7 +345,7 @@ def target_weights(ret: pd.DataFrame, strategy: str, k: float = 2.0,
     if strategy == "gmv":
         return gmv_weights(ret), None
     if strategy == "tangency":
-        return tangency_weights(ret), None
+        return tangency_weights(ret, rf=rf), None
     if strategy == "top4":
         return top4_weights(ret), composite_signal(ret)
     if strategy == "capm":
@@ -362,6 +408,11 @@ def build(week: int, cutoff: str, strategy: str = "gmv", k: float = 2.0, te: flo
 
     w, aux = target_weights(ret_upto, strategy, k_effective, te, lam=lam, rf=rf,
                             premium=premium, idx_ret=idx)
+    hist_cov = ret_upto.dropna().tail(104)
+    cov_shrunk = shrink_cov(hist_cov, 104)
+    cov_sample = hist_cov.cov().values * 52
+    vol_shrunk = float(np.sqrt(w.values @ cov_shrunk @ w.values))
+    vol_sample = float(np.sqrt(w.values @ cov_sample @ w.values))
 
     capital_prev, prev = previous_capital(week, raw, cutoff)
     c = w * capital_prev
@@ -410,6 +461,8 @@ def build(week: int, cutoff: str, strategy: str = "gmv", k: float = 2.0, te: flo
         "sum_weights": float(df["weight"].sum()),
         "gross_exposure": float(df["weight"].abs().sum()),
         "n_short": int((df["weight"] < 0).sum()),
+        "ex_ante_vol_shrunk%": round(vol_shrunk * 100, 2),
+        "ex_ante_vol_sample%": round(vol_sample * 100, 2),
         "data_source": meta.get("raw_source"),
         "data_last_weekly": meta.get("raw_last_weekly"),
         "created_at": datetime.now().isoformat(timespec="seconds"),
