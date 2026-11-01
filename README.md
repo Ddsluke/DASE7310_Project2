@@ -1,5 +1,7 @@
 # DASE7310 GP2 — Portfolio Construction & Weekly Rebalancing
 
+**Remote:** https://github.com/Ddsluke/DASE7310_Project2
+
 Group Project II: invest **HKD 1,000,000** across the same 10 HKEX stocks used in GP1,
 over the four trading weeks **2–27 November 2026**. Long-only by group choice; weekly
 rebalancing with at most **three adjustments**.
