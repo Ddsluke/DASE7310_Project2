@@ -19,22 +19,21 @@
 
 ## 目录 / Contents
 
-- [一句话 / At a glance](#intro)
-- [快速开始 / Quick start](#quickstart)
-- [仓库文件导引 / Repository map](#map)
-- [计划 / Plan](#plan)
-- [每周思路 / Weekly methodology](#weekly)
-- [结果位置 / Where to find results](#results)
-- [数据 / Data](#data)
-- [课程 benchmark 速查](#benchmarks)
-- [提交前检查清单](#checklist)
-- [常见坑 / Common pitfalls](#pitfalls)
-- [环境 / Environment](#env)
-- [文档阅读顺序 / Reading order](#reading)
+- [一句话 / At a glance](#0-一句话--at-a-glance)
+- [快速开始 / Quick start](#1-快速开始--quick-start)
+- [仓库文件导引 / Repository map](#2-仓库文件导引--repository-map)
+- [计划 / Plan](#3-计划--plan双语)
+- [每周思路 / Weekly methodology](#4-每周思路--weekly-methodology双语)
+- [结果位置 / Where to find results](#5-结果位置--where-to-find-results双语)
+- [数据 / Data](#6-数据--data双语)
+- [课程 benchmark 速查](#7-课程-benchmark-速查--course-benchmark-quick-reference)
+- [提交前检查清单](#8-提交前检查清单--pre-submission-checklist)
+- [常见坑 / Common pitfalls](#9-常见坑--common-pitfalls)
+- [环境 / Environment](#10-环境--environment)
+- [文档阅读顺序 / Reading order](#11-文档阅读顺序--reading-order)
 
 ---
 
-<a id="intro"></a>
 ## 0. 一句话 / At a glance
 
 **中文**：用 GP1 的 10 只港股，在 HKD 1,000,000、满仓、纯多头的约束下，做 4 周的组合构建与周度再平衡；方法从“无观点”的 GMV 出发，逐步加入 CAPM 市场观点、信号选股观点，最后按实际表现调整观点置信度。
@@ -43,7 +42,6 @@
 
 ---
 
-<a id="quickstart"></a>
 ## 1. 快速开始 / Quick start
 
 ```powershell
@@ -63,7 +61,6 @@ cd D:\Backup\Documents\dase7310\DASE7310_GP2_Repo
 
 ---
 
-<a id="map"></a>
 ## 2. 仓库文件导引 / Repository map
 
 | 文件 / File | 中文说明 / Chinese | English |
@@ -93,7 +90,6 @@ cd D:\Backup\Documents\dase7310\DASE7310_GP2_Repo
 
 ---
 
-<a id="plan"></a>
 ## 3. 计划 / Plan（双语）
 
 | 周 / Week | 估值截点 / Cutoff | 提交截止 / Submit by | 方法 / Method | 输出 / Output |
@@ -111,7 +107,6 @@ cd D:\Backup\Documents\dase7310\DASE7310_GP2_Repo
 
 ---
 
-<a id="weekly"></a>
 ## 4. 每周思路 / Weekly methodology（双语）
 
 ### Week 1 — GMV（无观点 / no view）
@@ -144,7 +139,6 @@ cd D:\Backup\Documents\dase7310\DASE7310_GP2_Repo
 
 ---
 
-<a id="results"></a>
 ## 5. 结果位置 / Where to find results（双语）
 
 ### 5.1 每周提交与结果 / Weekly submissions and realised results
@@ -191,7 +185,6 @@ cd D:\Backup\Documents\dase7310\DASE7310_GP2_Repo
 
 ---
 
-<a id="data"></a>
 ## 6. 数据 / Data（双语）
 
 ### 6.1 数据文件 / Data files
@@ -236,7 +229,6 @@ cd D:\Backup\Documents\dase7310\DASE7310_GP2_Repo
 
 ---
 
-<a id="benchmarks"></a>
 ## 7. 课程 benchmark 速查 / Course benchmark quick reference
 
 项目 PDF 要求对比“老师课上讲过的 benchmark methods”。Lecture 2–4 的六类是：
@@ -253,11 +245,10 @@ cd D:\Backup\Documents\dase7310\DASE7310_GP2_Repo
 **完整公式、主表、报告写法**：[BENCHMARKS_ZH.md](BENCHMARKS_ZH.md)（中文）。
 **Full formulas, tables and report-ready English**: [README_EN.md](README_EN.md) Section 6.
 
-> **Lecture 5–7 不是 GP2 benchmark**：它们是衍生品/固定收益（对冲、利率、期货、期权），主要服务 final exam 和 presentation。详见 [BENCHMARKS_ZH.md 第 8 节](BENCHMARKS_ZH.md#lecture57)。
+> **Lecture 5–7 不是 GP2 benchmark**：它们是衍生品/固定收益（对冲、利率、期货、期权），主要服务 final exam 和 presentation。详见 [BENCHMARKS_ZH.md 第 8 节](BENCHMARKS_ZH.md#8-lecture-57-与-gp2-的关系已逐页检查)。
 
 ---
 
-<a id="checklist"></a>
 ## 8. 提交前检查清单 / Pre-submission checklist
 
 - [ ] `params.json` 的 `cutoff` = 本周五 / cutoff is the correct Friday;
@@ -270,7 +261,6 @@ cd D:\Backup\Documents\dase7310\DASE7310_GP2_Repo
 
 ---
 
-<a id="pitfalls"></a>
 ## 9. 常见坑 / Common pitfalls
 
 1. **截点错周 / wrong cutoff**：第 2 周用 11/6，不是 10/30。
@@ -284,7 +274,6 @@ cd D:\Backup\Documents\dase7310\DASE7310_GP2_Repo
 
 ---
 
-<a id="env"></a>
 ## 10. 环境 / Environment
 
 ```powershell
@@ -297,7 +286,6 @@ Python 3.12、pandas 3.0、numpy 2.5、scipy 1.18、akshare 1.19、scikit-learn 
 
 ---
 
-<a id="reading"></a>
 ## 11. 文档阅读顺序 / Reading order
 
 1. **[README.md](README.md)**（本文件）— 5 分钟了解仓库和计划。
