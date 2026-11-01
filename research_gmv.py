@@ -68,6 +68,41 @@ def main():
     print(f"Constrained:   vol {np.sqrt(w_constrained.values @ cov_shrunk @ w_constrained.values)*100:.2f}%, "
           f"sum {w_constrained.sum():.4f}, shorts {(w_constrained < 0).sum()}")
 
+    # ---- shrinkage sensitivity: how much do the GMV weights move? ----
+    from scipy.optimize import minimize
+
+    def gmv_with(cov: np.ndarray) -> pd.Series:
+        n = len(S)
+        cons = [{"type": "eq", "fun": lambda w: w.sum() - 1}]
+        res = minimize(lambda w: w @ cov @ w, np.ones(n) / n, method="SLSQP",
+                       bounds=[(0.01, 0.25)] * n, constraints=cons,
+                       options={"maxiter": 1000, "ftol": 1e-14})
+        w = pd.Series(res.x, index=S)
+        return w / w.sum()
+
+    rows = []
+    for d in [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.7, 1.0]:
+        cov_d = (1 - d) * cov_sample + d * np.diag(np.diag(cov_sample))
+        w = gmv_with(cov_d)
+        rows.append({"shrinkage": d,
+                     "vol_at_sample%": float(np.sqrt(w.values @ cov_sample @ w.values)) * 100,
+                     **{s: float(w[s]) * 100 for s in S}})
+    sens = pd.DataFrame(rows)
+    sens.to_csv(RESEARCH / "shrinkage_sensitivity.csv", index=False)
+
+    try:
+        from sklearn.covariance import LedoitWolf
+        lw = LedoitWolf().fit(h.values)
+        w_lw = gmv_with(lw.covariance_ * 52)
+        print(f"\nLedoit-Wolf estimated shrinkage: {lw.shrinkage_:.3f}")
+        print("LW GMV weights (%): " + " ".join(f"{s}:{w_lw[s]*100:.1f}" for s in S))
+        print(f"LW vol at sample cov: {np.sqrt(w_lw.values @ cov_sample @ w_lw.values)*100:.2f}%")
+    except Exception as exc:  # noqa: BLE001
+        print(f"[LW] skipped: {exc}")
+
+    print("\n=== GMV weight sensitivity to fixed shrinkage (vol checked at sample cov) ===")
+    print(sens.round(2).to_string(index=False))
+
 
 if __name__ == "__main__":
     main()

@@ -163,6 +163,41 @@ Var(R_p) = w'Σw = Σ_i Σ_j w_i w_j σ_ij
 收缩会**低估相关性**，从而可能**低估组合风险**。这是用“稳定”换“准确”的取舍。
 更严谨的做法是用 **Ledoit-Wolf 收缩**（让数据自己决定收缩强度），这是报告里可以写的改进方向。
 
+### 3.4 30% 是常见收缩吗？——敏感性检验
+
+**不是“标准答案”。** 30% 是业界常见的“整数折扣”（haircut），但不是唯一做法，也不是数据驱动的最优值。
+
+用 sklearn 的 **Ledoit-Wolf** 在同一组数据上估计，最优收缩强度只有 **5.9%**，远低于 30%。
+
+关键是：**收缩强度对 GMV 权重的影响其实不大**。把 δ 从 0 拉到 1：
+
+| δ | 0066 | 3988 | 1398 | 0005 | 0016 | 1113 | 0981 | 样本协方差下的 vol |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 0.0 | 25.0 | 25.0 | 24.5 | 14.6 | 4.7 | 1.0 | 2.2 | 8.74% |
+| 0.1 | 25.0 | 25.0 | 23.6 | 14.5 | 5.8 | 1.0 | 2.1 | 8.74% |
+| 0.2 | 25.0 | 25.0 | 22.5 | 14.1 | 6.2 | 2.3 | 1.9 | 8.75% |
+| **0.3（当前）** | **25.0** | **25.0** | **21.2** | **13.6** | **6.5** | **4.1** | **1.7** | **8.77%** |
+| 0.5 | 25.0 | 25.0 | 19.2 | 12.7 | 7.2 | 6.6 | 1.3 | 8.81% |
+| 0.7 | 25.0 | 24.2 | 17.9 | 12.1 | 8.2 | 8.5 | 1.1 | 8.87% |
+| 1.0 | 22.5 | 20.6 | 17.1 | 11.9 | 10.2 | 11.3 | 1.0 | 9.19% |
+
+（9988、1810、0700 基本在 1% 下限，表中省略。）
+
+Ledoit-Wolf（δ=5.9%）的 GMV 权重：
+
+| 0066 | 3988 | 1398 | 0005 | 0016 | 1113 | 0981 | 其他 |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 25.0 | 25.0 | 20.7 | 13.9 | 7.2 | 2.9 | 2.3 | 各 1.0 |
+
+和我们的 δ=30% 版本几乎一样（最大差约 1.2pp）。
+
+**两个重要结论：**
+
+1. **权重稳**：δ 从 0 到 0.5，银行/港铁的权重基本不动，主要变化是 1398 与 1113/0016 之间的替换。所以“30% 还是 6%”不会改变第一周的组合方向。
+2. **风险口径要诚实**：我们平时说的 **7.85%** 是用“收缩后的协方差”算的；如果用**样本协方差**检查，组合年化波动是 **8.77%**。报告里建议写 **“约 8.8%（样本协方差口径）”**，更保守、更可信。
+
+> 报告写法：`We use a fixed 30% shrinkage as a robustness haircut. A Ledoit-Wolf estimate on the same window gives 5.9%; GMV weights change by at most 1.2pp, so the portfolio is not sensitive to this choice. Risk is reported at 8.8% under the sample covariance.`
+
 ---
 
 ## 4. GMV 怎么做
@@ -299,6 +334,41 @@ cd D:\Backup\Documents\dase7310\DASE7310_GP2_Repo
 - `weeks/week1/submission.xlsx`：提交表；
 - `weeks/week1/portfolio.csv`：完整表；
 - `weeks/week1/params.json`：参数和权重。
+
+### 5.4 代码用的是什么优化器？
+
+```python
+from scipy.optimize import minimize
+
+res = minimize(
+    fun=lambda w: w @ cov @ w,          # 目标：组合方差
+    x0=np.ones(10) / 10,                # 初始值：等权
+    method="SLSQP",                     # 优化算法
+    bounds=[(0.01, 0.25)] * 10,         # 每只股票 1%–25%
+    constraints=[{"type": "eq", "fun": lambda w: w.sum() - 1}],  # 满仓
+    options={"maxiter": 1000, "ftol": 1e-14},
+)
+```
+
+**SLSQP** = Sequential Least Squares Programming，是 SciPy 自带的一个通用约束优化器。
+
+- **免费、开源、标准**：`pip install scipy` 就有，不需要任何商业License；
+- **适合我们的小问题**：10 个变量、1 个等式约束、20 个边界约束；
+- **凸问题**：目标 `w'Σw` 是凸二次函数，约束是线性的，所以 SLSQP 找到的局部最优就是全局最优；
+- **代码里检查了 `res.success`**，失败会直接报错，不会悄悄用坏结果。
+
+其他可选方案（都能做到同一件事）：
+
+| 工具 | 特点 |
+|---|---|
+| `numpy.linalg.inv` | 无约束闭式解 `Σ⁻¹1/(1'Σ⁻¹1)`，一行代码；不能处理上下限 |
+| `cvxpy` | 声明式凸优化，最稳、最易读；需要额外安装 |
+| `quadprog` / `OSQP` | 专用二次规划求解器，速度快 |
+| Excel Solver | 老师/组员想手算验证时可用：目标 `w'Σw`，约束 `Σw=1`、`w>=0` |
+| MATLAB `quadprog` | 同样的 QP |
+
+> 如果老师问“你们用了什么优化方法”，回答：
+> “We solve a convex quadratic program (minimize w'Σw subject to 1'w = 1 and 0.01 ≤ w ≤ 0.25) with SciPy's SLSQP. The problem is convex, so the solution is the global minimum. The unconstrained closed-form solution is Σ⁻¹1/(1'Σ⁻¹1); we add constraints to rule out shorting and concentration.”
 
 ---
 

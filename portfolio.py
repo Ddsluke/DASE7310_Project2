@@ -209,7 +209,11 @@ def tilt_weights(ret: pd.DataFrame, te: float = 0.10, k: float = 1.0,
 
 def gmv_weights(ret: pd.DataFrame, win: int = 104, floor: float = 0.01,
                 cap: float = 0.25) -> pd.Series:
-    """课程 Lecture 2 的全局最小方差组合（纯多头 + 分散约束）。"""
+    """课程 Lecture 2 的全局最小方差组合（纯多头 + 分散约束）。
+
+    求解器: scipy.optimize.minimize(method="SLSQP")。
+    问题是凸二次规划（目标 w'Σw 凸、约束线性），所以局部最优 = 全局最优。
+    """
     from scipy.optimize import minimize
 
     cov = shrink_cov(ret, win)
@@ -218,6 +222,8 @@ def gmv_weights(ret: pd.DataFrame, win: int = 104, floor: float = 0.01,
     res = minimize(lambda w: w @ cov @ w, np.ones(n) / n, method="SLSQP",
                    bounds=[(floor, cap)] * n, constraints=cons,
                    options={"maxiter": 1000, "ftol": 1e-14})
+    if not res.success:
+        raise RuntimeError(f"GMV optimizer failed: {res.message}")
     w = pd.Series(res.x, index=STOCKS)
     return w / w.sum()
 

@@ -76,7 +76,9 @@ research_scan.py              signal IC, correlation, first strategy scan
 research_portfolios.py        tilt / top-k / GMV comparison
 research_backtest.py          walk-forward backtest of all production strategies
 research_gmv.py               covariance matrix + GMV step-by-step (teaching/repro)
+research_views.py             from no-view GMV to mean-variance views (CAPM / signal)
 GMV_EXPLAINED_ZH.md           Chinese explainer: covariance matrix and GMV
+VIEWS_EXPLAINED_ZH.md         Chinese explainer: how to express views in weeks 2-4
 data/
   daily_closes_raw.csv        unadjusted daily closes (accounting)
   daily_closes_hfq.csv        adjusted daily closes (signals)
@@ -98,6 +100,8 @@ research/
   covariance_104w.csv         annualised 10x10 covariance matrix (shrunk)
   correlation_104w.csv        10x10 correlation matrix
   gmv_weights.csv             unconstrained vs constrained GMV weights + risk contributions
+  shrinkage_sensitivity.csv   GMV weights across shrinkage intensity (0-100%)
+  views_frontier.csv          weights for sample-mean / CAPM / signal views at several lambda
   backtest_summary.csv        full / 2021-23 / 2024-26 performance by strategy
   backtest_4w_distribution.csv rolling 4-week return distribution
   week1_variants/             week-1 alternatives (EW, GMV, tilt k=1/3, top4)
@@ -147,21 +151,29 @@ start from the simplest result in the course and add one layer per week.
   −11.3%; 4-week 5th percentile −3.1%. It beat EW in the weak 2021–23 period
   (+3.7% vs +1.2%) but lagged in the 2024–26 rally (+17.0% vs +18.1%).
 
-### Week 2 — Mean–variance efficient frontier with shrunk means
-- Lecture 3: move up from GMV along the frontier.
-- `mu_shrunk = 0.5 * sample_mean + 0.5 * grand_mean` (shrinkage toward the
-  cross-sectional average), same covariance and constraints, target vol ~11–12%.
-- Compare with GMV and EW on the first realised week before adopting.
+### Week 2 — CAPM equilibrium view (Lecture 4)
+- Lecture 4: `mu_s = r_f + beta_s * market_premium`; beta estimated by regression on HSI.
+- This is a **market view** (high-beta stocks should earn more), not a stock-picking view.
+- Use a conservative risk aversion (`lambda` large) or a 9–10% vol target, so the
+  portfolio moves only slightly up the frontier from GMV.
+- Note: shrinking all means toward the grand mean is just adding a constant; because
+  `1'w = 1`, it does **not** change the optimal weights. Meaningful shrinkage must be
+  toward zero, toward CAPM, or via Black–Litterman.
+- Compare GMV, CAPM and EW on the first realised week before adopting.
 
-### Week 3 — Signal-based expected return
-- Replace the sample mean with a robust composite signal: 12-week momentum +
+### Week 3 — Signal-based relative view
+- Replace the equilibrium mean with a robust composite signal: 12-week momentum +
   distance from the 52-week high + low volatility (equal-weight z-scores).
-- Still long-only, same floor/cap. The composite has a positive rank IC in every
-  year of the sample (near-high IC 0.09, t ≈ 3.3), unlike raw sample means.
+- This is a **relative stock view**: overweight the high-score names, underweight the
+  low-score names. Still long-only, same floor/cap, 10–12% vol target.
+- The composite has a positive rank IC in every year of the sample (near-high IC 0.09,
+  t ≈ 3.3), unlike raw sample means. The sample-mean view would put 25% in SMIC (0981)
+  because of its 41% historical mean; the signal view keeps it at 1%.
 
-### Week 4 — Adaptive rule
+### Week 4 — Adaptive view confidence
 - Pre-registered: if cumulative active return vs EW is below −5pp at a rebalance,
-  cut the tilt multiplier `k` to 1.0 (shrink toward EW/GMV); otherwise keep it.
+  cut the view strength (raise `lambda` / lower the vol target) back toward GMV;
+  if above +5pp, keep the view but do not add leverage.
 - Record the decision and its reason in `params.json`.
 
 `k` (used by the `tilt` strategy) is the **active-bet multiplier**, not leverage:
