@@ -5,8 +5,9 @@
 **Remote:** https://github.com/Ddsluke/DASE7310_Project2
 
 **Documentation:** [中文主 README](README.md) · [Team playbook](TEAM_GUIDANCE_ZH.md) ·
-[Course benchmarks](BENCHMARKS_ZH.md) · [Week 2 guide](WEEK2_GUIDANCE_ZH.md) ·
-[Week 3 guide](WEEK3_GUIDANCE_ZH.md) · [Week 1 report](WEEK1_REPORT_EN.md)
+[Data guide](DATA_ZH.md) · [Course benchmarks](BENCHMARKS_ZH.md) ·
+[Week 2 guide](WEEK2_GUIDANCE_ZH.md) · [Week 3 guide](WEEK3_GUIDANCE_ZH.md) ·
+[Week 1 report](WEEK1_REPORT_EN.md)
 
 Group Project II: invest **HKD 1,000,000** across the same 10 HKEX stocks used in GP1,
 over the four trading weeks **2–27 November 2026**. Long-only by group choice; weekly

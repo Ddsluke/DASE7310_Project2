@@ -280,3 +280,4 @@ cd D:\Backup\Documents\dase7310\DASE7310_GP2_Repo
 | `ledger.md` | 周度实际收益台账（只追加） |
 | `README.md` | 中文主 README（文件导引 + 双语计划） |
 | `README_EN.md` | 英文版完整说明（规则、数据、流程、方法） |
+| `DATA_ZH.md` | 数据口径与更新指南（raw/hfq/无 qfq） |

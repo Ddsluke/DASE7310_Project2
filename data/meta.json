@@ -2,6 +2,9 @@
   "requested_start": "2020-01-01",
   "requested_end": "2026-10-30",
   "refresh_time": "2026-11-01T18:48:00",
+  "raw_adjust": "",
+  "hfq_adjust": "hfq",
+  "price_convention": "raw = unadjusted; hfq = backward-adjusted; qfq is NOT used",
   "raw_source": "sina",
   "raw_last_weekly": "2026-10-30",
   "raw_last_daily_date": {

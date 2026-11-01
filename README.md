@@ -10,6 +10,7 @@
 **快速链接 / Quick links**:
 [第 1 周提交](weeks/week1/submission.xlsx) ·
 [队友执行手册](TEAM_GUIDANCE_ZH.md) ·
+[数据更新指南](DATA_ZH.md) ·
 [课程 benchmark](BENCHMARKS_ZH.md) ·
 [第 2 周指南](WEEK2_GUIDANCE_ZH.md) ·
 [第 3 周指南](WEEK3_GUIDANCE_ZH.md) ·
@@ -74,6 +75,7 @@ cd D:\Backup\Documents\dase7310\DASE7310_GP2_Repo
 | [`BENCHMARKS_ZH.md`](BENCHMARKS_ZH.md) | **课程六类 benchmark 对照**（老师要求） | Course benchmark mapping and comparison |
 | [`GMV_EXPLAINED_ZH.md`](GMV_EXPLAINED_ZH.md) | 协方差矩阵 + GMV 原理 | Covariance matrix and GMV explainer |
 | [`VIEWS_EXPLAINED_ZH.md`](VIEWS_EXPLAINED_ZH.md) | 如何表达观点（CAPM/信号/自适应） | How to express views in Weeks 2–4 |
+| [`DATA_ZH.md`](DATA_ZH.md) | **数据口径与更新指南**（raw/hfq/无 qfq） | Data conventions and refresh guide |
 | [`WEEK1_REPORT_EN.md`](WEEK1_REPORT_EN.md) | 第 1 周英文报告（内部版，非最终提交） | Week 1 English report (internal draft) |
 | [`portfolio.py`](portfolio.py) | 主脚本：`refresh-data / build / evaluate` | Main pipeline |
 | [`research_benchmarks.py`](research_benchmarks.py) | 课程 benchmark 对比 + 有效前沿 + 两基金 | Course benchmarks, frontier, two-fund check |
@@ -220,6 +222,8 @@ cd D:\Backup\Documents\dase7310\DASE7310_GP2_Repo
 - Signals/covariance: **hfq** total returns; 104-week window, 30% shrinkage.
 - Initial capital `C_0 = 1,000,000`; from Week 2, `C_{i-1}` is the actual remaining capital.
 - Constraints: `Σw = 1`, all ten stocks held, 1%–25% per name, long-only.
+
+**更新数据 / Refresh**: 每周五收盘后运行 `refresh-data --end 本周五`；完整步骤、验证清单和常见问题见 [DATA_ZH.md](DATA_ZH.md)。
 
 ### 6.3 股票池 / Universe
 

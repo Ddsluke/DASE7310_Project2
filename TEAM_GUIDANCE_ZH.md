@@ -72,6 +72,8 @@
 
 用复权价算股数会差几倍，直接错。
 
+> 完整的数据口径、来源和更新步骤见 [DATA_ZH.md](DATA_ZH.md)。
+
 ### 2.2 周价格与截点
 
 - 周价格 = 每周 **W-FRI** 最后一根已实现收盘价；
@@ -163,6 +165,8 @@ Get-Content data\meta.json
 ```
 
 `meta.json` 里 `raw_last_weekly` 必须 = 本周五；如果不是，**不要提交**，先查数据源。
+
+完整数据更新说明（含验证清单、常见问题、vintage 复现）见 [DATA_ZH.md](DATA_ZH.md)。
 
 ### 4.2 周六：生成组合
 
@@ -393,6 +397,7 @@ BENCHMARKS_ZH.md
 |---|---|
 | `README.md` | 中文主 README（文件导引 + 双语计划） |
 | `README_EN.md` | 英文完整技术说明（规则、数据、流程、方法） |
+| `DATA_ZH.md` | 数据口径与更新指南（raw/hfq/无 qfq、验证清单、常见问题） |
 | `GUIDE_ZH.md` | 第 1 周中文行动指南 |
 | `WEEK2_GUIDANCE_ZH.md` | 第 2 周 CAPM 操作指南 |
 | `WEEK3_GUIDANCE_ZH.md` | 第 3 周信号操作指南 |

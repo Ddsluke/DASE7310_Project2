@@ -108,8 +108,18 @@ def _fetch_stocks(start: str, end: str, adjust: str, prefer: str = "sina", attem
 def refresh_data(end: str | None = None, prefer: str = "sina"):
     end = end or date.today().strftime("%Y-%m-%d")
     DATA.mkdir(parents=True, exist_ok=True)
-    meta = {"requested_start": START, "requested_end": end,
-            "refresh_time": datetime.now().isoformat(timespec="seconds")}
+    meta = {
+        "requested_start": START,
+        "requested_end": end,
+        "refresh_time": datetime.now().isoformat(timespec="seconds"),
+        # 数据口径（可审计）/ data convention (auditable):
+        # raw = 不复权 unadjusted (AkShare adjust="")
+        # hfq = 后复权 backward-adjusted (AkShare adjust="hfq")
+        # qfq (前复权) is NOT used anywhere in this project.
+        "raw_adjust": "",
+        "hfq_adjust": "hfq",
+        "price_convention": "raw = unadjusted; hfq = backward-adjusted; qfq is NOT used",
+    }
 
     for tag, adjust in [("raw", ""), ("hfq", "hfq")]:
         px, source = _fetch_stocks(START, end, adjust, prefer=prefer)
