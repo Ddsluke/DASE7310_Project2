@@ -1,0 +1,29 @@
+{
+  "week": 1,
+  "cutoff": "2026-10-30",
+  "trading_week_end": "2026-11-06",
+  "strategy": "ew",
+  "k": null,
+  "tracking_error_budget": null,
+  "capital_prev": 1000000.0,
+  "capital_check": 999999.9974183249,
+  "sum_weights": 1.0,
+  "gross_exposure": 1.0,
+  "n_short": 0,
+  "data_source": "sina",
+  "data_last_weekly": "2026-10-30",
+  "created_at": "2026-11-01T18:48:11",
+  "signals": null,
+  "weights": {
+    "9988": 0.1,
+    "0066": 0.1,
+    "1398": 0.1,
+    "3988": 0.1,
+    "0981": 0.1,
+    "0005": 0.1,
+    "1810": 0.1,
+    "0016": 0.1,
+    "1113": 0.1,
+    "0700": 0.1
+  }
+}
