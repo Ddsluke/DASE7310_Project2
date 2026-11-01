@@ -338,6 +338,7 @@ cd D:\Backup\Documents\dase7310\DASE7310_GP2_Repo
 
 ---
 
+<a id="lecture57"></a>
 ## 8. Lecture 5–7 与 GP2 的关系（已逐页检查）
 
 很多同学会问：“后面几讲是不是也有组合 benchmark？”答案是：**没有**。Lecture 5–7 是衍生品与固定收益，不是 GP2 的组合构建方法。

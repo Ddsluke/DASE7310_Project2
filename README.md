@@ -2,13 +2,39 @@
 
 **Portfolio Construction & Weekly Rebalancing**
 
-> 仓库 / Repo: https://github.com/Ddsluke/DASE7310_Project2
+> 仓库 / Repo: [Ddsluke/DASE7310_Project2](https://github.com/Ddsluke/DASE7310_Project2)
 > 数据截至 / Data through: **2026-10-30**
 > 第一周提交 / Week 1 submission: **2026-11-01**
 > 当前状态 / Status: Week 1 GMV snapshot ready; Week 2/3/4 pipeline ready.
 
+**快速链接 / Quick links**:
+[第 1 周提交](weeks/week1/submission.xlsx) ·
+[队友执行手册](TEAM_GUIDANCE_ZH.md) ·
+[课程 benchmark](BENCHMARKS_ZH.md) ·
+[第 2 周指南](WEEK2_GUIDANCE_ZH.md) ·
+[第 3 周指南](WEEK3_GUIDANCE_ZH.md) ·
+[英文 README](README_EN.md)
+
 ---
 
+## 目录 / Contents
+
+- [一句话 / At a glance](#intro)
+- [快速开始 / Quick start](#quickstart)
+- [仓库文件导引 / Repository map](#map)
+- [计划 / Plan](#plan)
+- [每周思路 / Weekly methodology](#weekly)
+- [结果位置 / Where to find results](#results)
+- [数据 / Data](#data)
+- [课程 benchmark 速查](#benchmarks)
+- [提交前检查清单](#checklist)
+- [常见坑 / Common pitfalls](#pitfalls)
+- [环境 / Environment](#env)
+- [文档阅读顺序 / Reading order](#reading)
+
+---
+
+<a id="intro"></a>
 ## 0. 一句话 / At a glance
 
 **中文**：用 GP1 的 10 只港股，在 HKD 1,000,000、满仓、纯多头的约束下，做 4 周的组合构建与周度再平衡；方法从“无观点”的 GMV 出发，逐步加入 CAPM 市场观点、信号选股观点，最后按实际表现调整观点置信度。
@@ -17,6 +43,7 @@
 
 ---
 
+<a id="quickstart"></a>
 ## 1. 快速开始 / Quick start
 
 ```powershell
@@ -36,44 +63,47 @@ cd D:\Backup\Documents\dase7310\DASE7310_GP2_Repo
 
 ---
 
+<a id="map"></a>
 ## 2. 仓库文件导引 / Repository map
 
 | 文件 / File | 中文说明 / Chinese | English |
 |---|---|---|
-| `README.md` | 本文件：中文文件导引 + 双语计划 | This file: Chinese guide + bilingual plan |
-| `README_EN.md` | 完整英文技术说明 | Full English technical README |
-| `TEAM_GUIDANCE_ZH.md` | **队友执行手册**：规则、流程、分工、AI prompt | Team playbook: rules, workflow, roles, AI prompt |
-| `GUIDE_ZH.md` | 第 1 周中文行动指南 | Week 1 action guide (Chinese) |
-| `WEEK2_GUIDANCE_ZH.md` | 第 2 周 CAPM 操作指南 | Week 2 CAPM guide |
-| `WEEK3_GUIDANCE_ZH.md` | 第 3 周信号操作指南 | Week 3 signal guide |
-| `BENCHMARKS_ZH.md` | **课程六类 benchmark 对照**（老师要求） | Course benchmark mapping and comparison |
-| `GMV_EXPLAINED_ZH.md` | 协方差矩阵 + GMV 原理 | Covariance matrix and GMV explainer |
-| `VIEWS_EXPLAINED_ZH.md` | 如何表达观点（CAPM/信号/自适应） | How to express views in Weeks 2–4 |
-| `WEEK1_REPORT_EN.md` | 第 1 周英文报告（内部版，非最终提交） | Week 1 English report (internal draft) |
-| `portfolio.py` | 主脚本：`refresh-data / build / evaluate` | Main pipeline |
-| `research_benchmarks.py` | 课程 benchmark 对比 + 有效前沿 + 两基金 | Course benchmarks, frontier, two-fund check |
-| `research_backtest.py` | 策略 walk-forward 回测 | Strategy backtest |
-| `research_views.py` | 无观点 → 有观点的权重路径 | View intensity path |
-| `research_gmv.py` | 协方差 + GMV 复现 | Covariance and GMV reproduction |
-| `research_scan.py` | 信号 IC / 相关性扫描 | Signal IC and correlation scan |
-| `research_portfolios.py` | 组合方案比较 | Portfolio comparison |
-| `data/` | 原始/后复权价格、周收益、指数、meta | Raw/hfq prices, returns, indices, metadata |
-| `weeks/weekN/` | 每周提交快照与实际结果 | Weekly submission snapshots and realised results |
-| `research/` | 所有研究 CSV 输出 | All research CSV outputs |
-| `ledger.md` | 周度实际收益台账（append-only） | Weekly realised-return ledger |
+| [`README.md`](README.md) | 本文件：中文文件导引 + 双语计划 | This file: Chinese guide + bilingual plan |
+| [`README_EN.md`](README_EN.md) | 完整英文技术说明 | Full English technical README |
+| [`TEAM_GUIDANCE_ZH.md`](TEAM_GUIDANCE_ZH.md) | **队友执行手册**：规则、流程、分工、AI prompt | Team playbook: rules, workflow, roles, AI prompt |
+| [`GUIDE_ZH.md`](GUIDE_ZH.md) | 第 1 周中文行动指南 | Week 1 action guide (Chinese) |
+| [`WEEK2_GUIDANCE_ZH.md`](WEEK2_GUIDANCE_ZH.md) | 第 2 周 CAPM 操作指南 | Week 2 CAPM guide |
+| [`WEEK3_GUIDANCE_ZH.md`](WEEK3_GUIDANCE_ZH.md) | 第 3 周信号操作指南 | Week 3 signal guide |
+| [`BENCHMARKS_ZH.md`](BENCHMARKS_ZH.md) | **课程六类 benchmark 对照**（老师要求） | Course benchmark mapping and comparison |
+| [`GMV_EXPLAINED_ZH.md`](GMV_EXPLAINED_ZH.md) | 协方差矩阵 + GMV 原理 | Covariance matrix and GMV explainer |
+| [`VIEWS_EXPLAINED_ZH.md`](VIEWS_EXPLAINED_ZH.md) | 如何表达观点（CAPM/信号/自适应） | How to express views in Weeks 2–4 |
+| [`WEEK1_REPORT_EN.md`](WEEK1_REPORT_EN.md) | 第 1 周英文报告（内部版，非最终提交） | Week 1 English report (internal draft) |
+| [`portfolio.py`](portfolio.py) | 主脚本：`refresh-data / build / evaluate` | Main pipeline |
+| [`research_benchmarks.py`](research_benchmarks.py) | 课程 benchmark 对比 + 有效前沿 + 两基金 | Course benchmarks, frontier, two-fund check |
+| [`research_backtest.py`](research_backtest.py) | 策略 walk-forward 回测 | Strategy backtest |
+| [`research_views.py`](research_views.py) | 无观点 → 有观点的权重路径 | View intensity path |
+| [`research_gmv.py`](research_gmv.py) | 协方差 + GMV 复现 | Covariance and GMV reproduction |
+| [`research_scan.py`](research_scan.py) | 信号 IC / 相关性扫描 | Signal IC and correlation scan |
+| [`research_portfolios.py`](research_portfolios.py) | 组合方案比较 | Portfolio comparison |
+| [`requirements.txt`](requirements.txt) | Python 依赖 | Python dependencies |
+| [`data/`](data/) | 原始/后复权价格、周收益、指数、meta | Raw/hfq prices, returns, indices, metadata |
+| [`weeks/`](weeks/) | 每周提交快照与实际结果 | Weekly submission snapshots and realised results |
+| [`research/`](research/) | 所有研究 CSV 输出 | All research CSV outputs |
+| [`ledger.md`](ledger.md) | 周度实际收益台账（append-only） | Weekly realised-return ledger |
 
 ---
 
+<a id="plan"></a>
 ## 3. 计划 / Plan（双语）
 
 | 周 / Week | 估值截点 / Cutoff | 提交截止 / Submit by | 方法 / Method | 输出 / Output |
 |---|---|---|---|---|
-| **1** | 2026-10-30 | 2026-11-01 | **GMV**：只用协方差，纯多头 1%–25% / risk-only global minimum variance | `weeks/week1/submission.xlsx` |
-| **2** | 2026-11-06 | 2026-11-08 | **CAPM / SML**：`μ_s = r_f + β_s × premium`，λ=15 / market view | `weeks/week2/submission.xlsx` |
-| **3** | 2026-11-13 | 2026-11-15 | **Signal**：12 周动量 + 距 52 周高点 + 低波动，λ=8 / relative stock view | `weeks/week3/submission.xlsx` |
-| **4** | 2026-11-20 | 2026-11-22 | **Adaptive**：按前 3 周累计主动收益调整 λ / confidence update | `weeks/week4/submission.xlsx` |
-| — | — | **2026-11-30** | 5 页报告 + 互评 / 5-page report + peer evaluation | 最终报告 / final report |
-| — | — | **2026-11-23 / 30** | 10 分钟展示，覆盖 GP1 + GP2 / 10-min presentation | slides |
+| **1** | 2026-10-30 | 2026-11-01 | **GMV**：只用协方差，纯多头 1%–25% / risk-only global minimum variance | [week1/submission.xlsx](weeks/week1/submission.xlsx) |
+| **2** | 2026-11-06 | 2026-11-08 | **CAPM / SML**：`μ_s = r_f + β_s × premium`，λ=15 / market view | [weeks/](weeks/)（`build --week 2` 生成） |
+| **3** | 2026-11-13 | 2026-11-15 | **Signal**：12 周动量 + 距 52 周高点 + 低波动，λ=8 / relative stock view | [weeks/](weeks/)（`build --week 3` 生成） |
+| **4** | 2026-11-20 | 2026-11-22 | **Adaptive**：按前 3 周累计主动收益调整 λ / confidence update | [weeks/](weeks/)（`build --week 4` 生成） |
+| — | — | **2026-11-30** | 5 页报告 + 互评 / 5-page report + peer evaluation | 最终报告 / final report（待写 / to be written） |
+| — | — | **2026-11-23 / 30** | 10 分钟展示，覆盖 GP1 + GP2 / 10-min presentation | slides（待写 / to be written） |
 
 **规则 / Rules**：HKD 1,000,000；`Σw = 1`；10 只股票；不做空；周内 buy-and-hold；全程最多 3 次调整（第 2/3/4 周各一次）。
 
@@ -81,6 +111,7 @@ cd D:\Backup\Documents\dase7310\DASE7310_GP2_Repo
 
 ---
 
+<a id="weekly"></a>
 ## 4. 每周思路 / Weekly methodology（双语）
 
 ### Week 1 — GMV（无观点 / no view）
@@ -113,67 +144,69 @@ cd D:\Backup\Documents\dase7310\DASE7310_GP2_Repo
 
 ---
 
+<a id="results"></a>
 ## 5. 结果位置 / Where to find results（双语）
 
 ### 5.1 每周提交与结果 / Weekly submissions and realised results
 
 | 内容 / Item | 位置 / Location |
 |---|---|
-| Moodle 提交表 / Moodle submission | `weeks/weekN/submission.xlsx` |
-| 同内容 CSV / same table as CSV | `weeks/weekN/submission.csv` |
-| 完整内部表（价格、权重、资本、股数）/ full table | `weeks/weekN/portfolio.csv` |
-| 参数、截点、方法、权重 / parameters | `weeks/weekN/params.json` |
-| 人类可读快照 / human-readable snapshot | `weeks/weekN/report.md` |
-| 目标周实际结果 / realised results | `weeks/weekN/realized.csv`、`realized_summary.json` |
-| 周度台账 / weekly ledger | `ledger.md`（append-only） |
+| Moodle 提交表 / Moodle submission | [weeks/week1/submission.xlsx](weeks/week1/submission.xlsx)（Week 1 示例；Week N 为 `weeks/weekN/submission.xlsx`） |
+| 同内容 CSV / same table as CSV | [weeks/week1/submission.csv](weeks/week1/submission.csv) |
+| 完整内部表（价格、权重、资本、股数）/ full table | [weeks/week1/portfolio.csv](weeks/week1/portfolio.csv) |
+| 参数、截点、方法、权重 / parameters | [weeks/week1/params.json](weeks/week1/params.json) |
+| 人类可读快照 / human-readable snapshot | [weeks/week1/report.md](weeks/week1/report.md) |
+| 目标周实际结果 / realised results | `weeks/weekN/realized.csv`、`realized_summary.json`（目标周结束后生成） |
+| 周度台账 / weekly ledger | [ledger.md](ledger.md)（append-only） |
 
 ### 5.2 课程 benchmark 与研究 / Course benchmarks and research
 
 | 内容 / Item | 位置 / Location |
 |---|---|
-| 课程 benchmark 主表 / main benchmark table | `research/benchmark_summary.csv` |
-| 4 周收益分布 / 4-week distribution | `research/benchmark_4w_distribution.csv` |
-| 各方法最终权重 / final weights | `research/benchmark_final_weights.csv` |
-| 有效前沿 / efficient frontier | `research/frontier_20261030.csv` |
-| 各方法离前沿的缺口 / frontier gaps | `research/frontier_points.csv` |
-| 两基金定理检查 / two-fund check | `research/two_fund_check.csv` |
-| 原始切点组合诊断 / raw tangency diagnostic | `research/benchmark_diagnostics.csv` |
-| 策略回测 / strategy backtest | `research/backtest_summary.csv` |
-| 信号 IC / signal IC | `research/scan_ic.csv` |
-| 协方差 / covariance | `research/covariance_104w.csv` |
-| 相关系数 / correlation | `research/correlation_104w.csv` |
-| GMV 权重与风险贡献 / GMV weights & risk contributions | `research/gmv_weights.csv` |
-| 收缩敏感性 / shrinkage sensitivity | `research/shrinkage_sensitivity.csv` |
-| 观点强度路径 / view intensity path | `research/views_frontier.csv` |
+| 课程 benchmark 主表 / main benchmark table | [research/benchmark_summary.csv](research/benchmark_summary.csv) |
+| 4 周收益分布 / 4-week distribution | [research/benchmark_4w_distribution.csv](research/benchmark_4w_distribution.csv) |
+| 各方法最终权重 / final weights | [research/benchmark_final_weights.csv](research/benchmark_final_weights.csv) |
+| 有效前沿 / efficient frontier | [research/frontier_20261030.csv](research/frontier_20261030.csv) |
+| 各方法离前沿的缺口 / frontier gaps | [research/frontier_points.csv](research/frontier_points.csv) |
+| 两基金定理检查 / two-fund check | [research/two_fund_check.csv](research/two_fund_check.csv) |
+| 原始切点组合诊断 / raw tangency diagnostic | [research/benchmark_diagnostics.csv](research/benchmark_diagnostics.csv) |
+| 策略回测 / strategy backtest | [research/backtest_summary.csv](research/backtest_summary.csv) |
+| 信号 IC / signal IC | [research/scan_ic.csv](research/scan_ic.csv) |
+| 协方差 / covariance | [research/covariance_104w.csv](research/covariance_104w.csv) |
+| 相关系数 / correlation | [research/correlation_104w.csv](research/correlation_104w.csv) |
+| GMV 权重与风险贡献 / GMV weights & risk contributions | [research/gmv_weights.csv](research/gmv_weights.csv) |
+| 收缩敏感性 / shrinkage sensitivity | [research/shrinkage_sensitivity.csv](research/shrinkage_sensitivity.csv) |
+| 观点强度路径 / view intensity path | [research/views_frontier.csv](research/views_frontier.csv) |
 
 ### 5.3 报告与展示 / Report and presentation
 
 | 内容 / Item | 位置 / Location |
 |---|---|
-| 第 1 周英文报告（内部版）/ Week 1 report draft | `WEEK1_REPORT_EN.md` |
-| 课程 benchmark 报告写法 / report-ready benchmark text | `BENCHMARKS_ZH.md` |
-| 最终 5 页报告 / final 5-page report | **待写 / to be written**（建议基于 `WEEK1_REPORT_EN.md` + `BENCHMARKS_ZH.md`） |
-| 展示 slides / presentation | **待写 / to be written**（建议按 `TEAM_GUIDANCE_ZH.md` 第 8 节） |
+| 第 1 周英文报告（内部版）/ Week 1 report draft | [WEEK1_REPORT_EN.md](WEEK1_REPORT_EN.md) |
+| 课程 benchmark 报告写法 / report-ready benchmark text | [BENCHMARKS_ZH.md](BENCHMARKS_ZH.md) |
+| 最终 5 页报告 / final 5-page report | **待写 / to be written**（建议基于 [WEEK1_REPORT_EN.md](WEEK1_REPORT_EN.md) + [BENCHMARKS_ZH.md](BENCHMARKS_ZH.md)） |
+| 展示 slides / presentation | **待写 / to be written**（建议按 [TEAM_GUIDANCE_ZH.md](TEAM_GUIDANCE_ZH.md) 第 8 节） |
 
 > **规则 / Rule**：报告里每个数字都必须能指到上面的 CSV/JSON；表下面写 `Source: research/xxx.csv`。
 
 ---
 
+<a id="data"></a>
 ## 6. 数据 / Data（双语）
 
 ### 6.1 数据文件 / Data files
 
 | 文件 / File | 中文说明 / Chinese | English |
 |---|---|---|
-| `data/weekly_closes_raw.csv` | **未复权**周收盘价，用于算股数和资本 | **Raw** weekly closes; used for shares and capital |
-| `data/weekly_closes_hfq.csv` | **后复权**周收盘价，用于算信号/协方差 | **hfq** weekly closes; used for signals and covariance |
-| `data/weekly_returns_raw.csv` | 未复权周收益 | Raw weekly returns |
-| `data/weekly_returns_hfq.csv` | 后复权周收益 | hfq weekly returns |
-| `data/daily_closes_raw.csv` | 未复权日线 | Raw daily closes |
-| `data/daily_closes_hfq.csv` | 后复权日线 | hfq daily closes |
-| `data/index_closes.csv` | HSI / HSTECH 周收盘 | HSI / HSTECH weekly closes |
-| `data/index_returns.csv` | HSI / HSTECH 周收益 | HSI / HSTECH weekly returns |
-| `data/meta.json` | 数据源、刷新时间、最后日期 | Source, refresh time, last available date |
+| [`data/weekly_closes_raw.csv`](data/weekly_closes_raw.csv) | **未复权**周收盘价，用于算股数和资本 | **Raw** weekly closes; used for shares and capital |
+| [`data/weekly_closes_hfq.csv`](data/weekly_closes_hfq.csv) | **后复权**周收盘价，用于算信号/协方差 | **hfq** weekly closes; used for signals and covariance |
+| [`data/weekly_returns_raw.csv`](data/weekly_returns_raw.csv) | 未复权周收益 | Raw weekly returns |
+| [`data/weekly_returns_hfq.csv`](data/weekly_returns_hfq.csv) | 后复权周收益 | hfq weekly returns |
+| [`data/daily_closes_raw.csv`](data/daily_closes_raw.csv) | 未复权日线 | Raw daily closes |
+| [`data/daily_closes_hfq.csv`](data/daily_closes_hfq.csv) | 后复权日线 | hfq daily closes |
+| [`data/index_closes.csv`](data/index_closes.csv) | HSI / HSTECH 周收盘 | HSI / HSTECH weekly closes |
+| [`data/index_returns.csv`](data/index_returns.csv) | HSI / HSTECH 周收益 | HSI / HSTECH weekly returns |
+| [`data/meta.json`](data/meta.json) | 数据源、刷新时间、最后日期 | Source, refresh time, last available date |
 
 ### 6.2 口径 / Conventions
 
@@ -203,26 +236,28 @@ cd D:\Backup\Documents\dase7310\DASE7310_GP2_Repo
 
 ---
 
+<a id="benchmarks"></a>
 ## 7. 课程 benchmark 速查 / Course benchmark quick reference
 
 项目 PDF 要求对比“老师课上讲过的 benchmark methods”。Lecture 2–4 的六类是：
 
 | # | Benchmark | 课程 / Lecture | 我们的文件 / Our file |
 |---|---|---|---|
-| 1 | 等权 1/N / equal weight | Lecture 2 | `EW` in `benchmark_summary.csv` |
-| 2 | GMV | Lecture 2/3 | `GMV_uncon` / `GMV_con` |
-| 3 | 有效前沿 / efficient frontier | Lecture 3 | `frontier_20261030.csv`、`frontier_points.csv` |
-| 4 | 切点 / max Sharpe | Lecture 3 | `Tangency_uncon_cap2` / `Tangency_con` |
-| 5 | 两基金定理 / two-fund theorem | Lecture 3 | `two_fund_check.csv` |
-| 6 | CAPM / SML / 市场组合 | Lecture 4 | `CAPM_con`、`Market_HSI` |
+| 1 | 等权 1/N / equal weight | Lecture 2 | [`EW`](research/benchmark_summary.csv) in `benchmark_summary.csv` |
+| 2 | GMV | Lecture 2/3 | [`GMV_uncon` / `GMV_con`](research/benchmark_final_weights.csv) |
+| 3 | 有效前沿 / efficient frontier | Lecture 3 | [frontier_20261030.csv](research/frontier_20261030.csv)、[frontier_points.csv](research/frontier_points.csv) |
+| 4 | 切点 / max Sharpe | Lecture 3 | [`Tangency_uncon_cap2` / `Tangency_con`](research/benchmark_final_weights.csv) |
+| 5 | 两基金定理 / two-fund theorem | Lecture 3 | [two_fund_check.csv](research/two_fund_check.csv) |
+| 6 | CAPM / SML / 市场组合 | Lecture 4 | [`CAPM_con` / `Market_HSI`](research/benchmark_summary.csv) |
 
-**完整公式、主表、报告写法**：`BENCHMARKS_ZH.md`（中文）。
-**Full formulas, tables and report-ready English**: `README_EN.md` Section 6.
+**完整公式、主表、报告写法**：[BENCHMARKS_ZH.md](BENCHMARKS_ZH.md)（中文）。
+**Full formulas, tables and report-ready English**: [README_EN.md](README_EN.md) Section 6.
 
-> **Lecture 5–7 不是 GP2 benchmark**：它们是衍生品/固定收益（对冲、利率、期货、期权），主要服务 final exam 和 presentation。详见 `BENCHMARKS_ZH.md` 第 8 节。
+> **Lecture 5–7 不是 GP2 benchmark**：它们是衍生品/固定收益（对冲、利率、期货、期权），主要服务 final exam 和 presentation。详见 [BENCHMARKS_ZH.md 第 8 节](BENCHMARKS_ZH.md#lecture57)。
 
 ---
 
+<a id="checklist"></a>
 ## 8. 提交前检查清单 / Pre-submission checklist
 
 - [ ] `params.json` 的 `cutoff` = 本周五 / cutoff is the correct Friday;
@@ -231,10 +266,11 @@ cd D:\Backup\Documents\dase7310\DASE7310_GP2_Repo
 - [ ] `股数 × 价格 ≈ 资本` / `shares × price ≈ capital`;
 - [ ] Excel 与 CSV 数字一致 / Excel and CSV agree;
 - [ ] Moodle 上传成功 / Moodle upload confirmed;
-- [ ] `ledger.md` 已记录上一周实际结果 / previous week's realised result is in the ledger.
+- [ ] [ledger.md](ledger.md) 已记录上一周实际结果 / previous week's realised result is in the ledger.
 
 ---
 
+<a id="pitfalls"></a>
 ## 9. 常见坑 / Common pitfalls
 
 1. **截点错周 / wrong cutoff**：第 2 周用 11/6，不是 10/30。
@@ -248,6 +284,7 @@ cd D:\Backup\Documents\dase7310\DASE7310_GP2_Repo
 
 ---
 
+<a id="env"></a>
 ## 10. 环境 / Environment
 
 ```powershell
@@ -256,15 +293,16 @@ $py = 'C:\Users\Administrator\miniforge3\envs\dase7310\python.exe'
 ```
 
 Python 3.12、pandas 3.0、numpy 2.5、scipy 1.18、akshare 1.19、scikit-learn 1.9、openpyxl。
-完整依赖见 `requirements.txt`；环境锁定见 `README_EN.md` 第 8 节。
+完整依赖见 [requirements.txt](requirements.txt)；环境锁定见 [README_EN.md](README_EN.md) 第 8 节。
 
 ---
 
+<a id="reading"></a>
 ## 11. 文档阅读顺序 / Reading order
 
-1. **`README.md`**（本文件）— 5 分钟了解仓库和计划。
-2. **`TEAM_GUIDANCE_ZH.md`** — 要执行第 2/3/4 周的人必读；含 AI prompt。
-3. **`WEEK2_GUIDANCE_ZH.md` / `WEEK3_GUIDANCE_ZH.md`** — 当周具体操作。
-4. **`BENCHMARKS_ZH.md`** — 写报告 comparison 小节必读。
-5. **`GMV_EXPLAINED_ZH.md` / `VIEWS_EXPLAINED_ZH.md`** — 想理解原理时读。
-6. **`README_EN.md`** — 需要完整英文技术说明时读。
+1. **[README.md](README.md)**（本文件）— 5 分钟了解仓库和计划。
+2. **[TEAM_GUIDANCE_ZH.md](TEAM_GUIDANCE_ZH.md)** — 要执行第 2/3/4 周的人必读；含 AI prompt。
+3. **[WEEK2_GUIDANCE_ZH.md](WEEK2_GUIDANCE_ZH.md)** / **[WEEK3_GUIDANCE_ZH.md](WEEK3_GUIDANCE_ZH.md)** — 当周具体操作。
+4. **[BENCHMARKS_ZH.md](BENCHMARKS_ZH.md)** — 写报告 comparison 小节必读。
+5. **[GMV_EXPLAINED_ZH.md](GMV_EXPLAINED_ZH.md)** / **[VIEWS_EXPLAINED_ZH.md](VIEWS_EXPLAINED_ZH.md)** — 想理解原理时读。
+6. **[README_EN.md](README_EN.md)** — 需要完整英文技术说明时读。
