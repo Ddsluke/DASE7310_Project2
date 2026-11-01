@@ -278,4 +278,5 @@ cd D:\Backup\Documents\dase7310\DASE7310_GP2_Repo
 | `research_views.py` | 复现“无观点 → 有观点”权重变化的脚本 |
 | `research_benchmarks.py` | 复现课程 benchmark 对比、有效前沿、两基金检查 |
 | `ledger.md` | 周度实际收益台账（只追加） |
-| `README.md` | 英文版完整说明（规则、数据、流程、方法） |
+| `README.md` | 中文主 README（文件导引 + 双语计划） |
+| `README_EN.md` | 英文版完整说明（规则、数据、流程、方法） |

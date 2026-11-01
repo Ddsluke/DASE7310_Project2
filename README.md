@@ -1,281 +1,270 @@
-# DASE7310 GP2 — Portfolio Construction & Weekly Rebalancing
+# DASE7310 Group Project 2 — 投资组合构建与周度再平衡
 
-**Remote:** https://github.com/Ddsluke/DASE7310_Project2
+**Portfolio Construction & Weekly Rebalancing**
 
-Group Project II: invest **HKD 1,000,000** across the same 10 HKEX stocks used in GP1,
-over the four trading weeks **2–27 November 2026**. Long-only by group choice; weekly
-rebalancing with at most **three adjustments**.
-
-This repo is the single source of truth for the portfolio snapshots, the research
-evidence, and the weekly ledger. Snapshots are **append-only**: never overwrite a
-submitted week; add a new file / variant instead.
+> 仓库 / Repo: https://github.com/Ddsluke/DASE7310_Project2
+> 数据截至 / Data through: **2026-10-30**
+> 第一周提交 / Week 1 submission: **2026-11-01**
+> 当前状态 / Status: Week 1 GMV snapshot ready; Week 2/3/4 pipeline ready.
 
 ---
 
-## 1. Rules (from `Group-Project-2_2026.pdf`, dated 26 Oct 2026)
+## 0. 一句话 / At a glance
 
-| Item | Value |
-|---|---|
-| Stock pool | 9988, 0066, 1398, 3988, 0981, 0005, 1810, 0016, 1113, 0700 |
-| Initial capital | HKD 1,000,000, fully allocated (`sum_s w_s = 1`) |
-| Short selling | Permitted by the project; **not used by this group** |
-| Holding period | Buy-and-hold within each trading week |
-| Rebalancing | Before each new week, max **3 adjustments** total (weeks 2, 3, 4) |
-| Trading weeks | Nov 2–6, Nov 9–13, Nov 16–20, Nov 23–27 |
-| Submission deadlines | **Nov 1, Nov 8, Nov 15, Nov 22** (Sun 23:59, HK time) |
-| Report + peer eval | **Nov 30** (5 pages, excluding cover/TOC) |
-| Oral presentation | **Nov 23 and Nov 30** (10 min, covers GP1 + GP2) |
-| Grading | Weekly ranking 30%, presentation & participation 30%, report 20%, peer 20% |
+**中文**：用 GP1 的 10 只港股，在 HKD 1,000,000、满仓、纯多头的约束下，做 4 周的组合构建与周度再平衡；方法从“无观点”的 GMV 出发，逐步加入 CAPM 市场观点、信号选股观点，最后按实际表现调整观点置信度。
 
-Formulas used for every snapshot:
-
-```
-w_{s,i} = c_{s,i-1} / C_{i-1}
-h_{s,i} = c_{s,i-1} / p_{s,i-1}
-C_i     = sum_s p_{s,i} * h_{s,i}
-R_i     = (C_i - C_{i-1}) / C_{i-1}
-```
-
-> **Date discrepancy:** the Lecture 1 syllabus still says "five weeks, Oct 26 – Nov 29,
-> five adjustments". The official GP2 PDF (26 Oct) says four weeks, Nov 2–27, three
-> adjustments, and the PDF's Table 1 is the authoritative submission list. This repo
-> follows the PDF. Confirm with the instructor/TA if in doubt.
+**English**: Build and rebalance a HKD 1,000,000 long-only portfolio of the same ten HKEX stocks over four weeks. The method starts from the no-view GMV portfolio, then adds a CAPM market view, a characteristic-based stock view, and finally a pre-registered adaptive confidence rule.
 
 ---
 
-## 2. Data convention (important)
-
-| Purpose | Price series | Why |
-|---|---|---|
-| Signals, covariance, backtest returns | **hfq** (后复权) | Total-return series; corporate actions removed |
-| Share count `h = c / p` and capital `C = p*h` | **raw** (未复权真实收盘价) | The course's `p` is the actual market close; adjusted prices are not tradeable |
-
-Using hfq prices for share counts would be badly wrong: e.g. HSBC's hfq price is
-952.05 while its actual close is 135.70 (a 7× difference), and SMIC's hfq price is
-4.298 vs an actual 42.98.
-
-Weekly prices are the last realised close of each **W-FRI** week. The valuation date
-for week *i* is the Friday before it starts:
-
-| Week | Valuation date (cutoff) | Trading week |
-|---|---|---|
-| 1 | 2026-10-30 | 2026-11-02 → 2026-11-06 |
-| 2 | 2026-11-06 | 2026-11-09 → 2026-11-13 |
-| 3 | 2026-11-13 | 2026-11-16 → 2026-11-20 |
-| 4 | 2026-11-20 | 2026-11-23 → 2026-11-27 |
-
-Shares are computed by the course formula and kept to 6 decimals. The formula allows
-fractional shares; board-lot rounding would leave capital uninvested and violate the
-"fully allocated" requirement. `integer_lots` is shown for reference only.
-
----
-
-## 3. Repo layout
-
-```
-portfolio.py                  single pipeline: refresh-data / build / evaluate
-research_scan.py              signal IC, correlation, first strategy scan
-research_portfolios.py        tilt / top-k / GMV comparison
-research_backtest.py          walk-forward backtest of all production strategies
-research_gmv.py               covariance matrix + GMV step-by-step (teaching/repro)
-research_views.py             from no-view GMV to mean-variance views (CAPM / signal)
-research_benchmarks.py        course benchmark comparison, frontier, two-fund check
-GUIDE_ZH.md                   Chinese Week 1 action guide
-TEAM_GUIDANCE_ZH.md           full team playbook (rules, workflow, benchmarks, roles)
-BENCHMARKS_ZH.md              course benchmark mapping and comparison
-WEEK1_REPORT_EN.md            English Week 1 report (internal, not the final submission)
-WEEK2_GUIDANCE_ZH.md          Week 2 guide: CAPM equilibrium view
-WEEK3_GUIDANCE_ZH.md          Week 3 guide: signal view
-GMV_EXPLAINED_ZH.md           Chinese explainer: covariance matrix and GMV
-VIEWS_EXPLAINED_ZH.md         Chinese explainer: how to express views in weeks 2-4
-data/
-  daily_closes_raw.csv        unadjusted daily closes (accounting)
-  daily_closes_hfq.csv        adjusted daily closes (signals)
-  weekly_closes_raw.csv       Friday closes, raw
-  weekly_closes_hfq.csv       Friday closes, hfq
-  weekly_returns_hfq.csv      weekly total returns
-  index_closes.csv            HSI / HSTECH
-  meta.json                   vintage, source, last data date
-weeks/weekN/
-  submission.xlsx             Moodle-ready: Summary / Submission / Details / Notes
-  submission.csv              same table as CSV
-  portfolio.csv               full internal table (prices, weights, capital, shares)
-  params.json                 cutoff, method, parameters, weights, capital
-  report.md                   human-readable snapshot
-  realized.csv                appended after the week ends (never edits predictions)
-  realized_summary.json       weekly return, EW benchmark, active return
-research/
-  scan_ic.csv                 cross-sectional rank IC of candidate signals
-  covariance_104w.csv         annualised 10x10 covariance matrix (shrunk)
-  correlation_104w.csv        10x10 correlation matrix
-  gmv_weights.csv             unconstrained vs constrained GMV weights + risk contributions
-  shrinkage_sensitivity.csv   GMV weights across shrinkage intensity (0-100%)
-  views_frontier.csv          weights for sample-mean / CAPM / signal views at several lambda
-  benchmark_summary.csv       course benchmark performance (1/N, GMV, tangency, CAPM, HSI)
-  benchmark_4w_distribution.csv
-  benchmark_final_weights.csv
-  frontier_20261030.csv       long-only efficient frontier at the final cutoff
-  frontier_points.csv         where each method sits vs the frontier
-  two_fund_check.csv          two-fund theorem check
-  backtest_summary.csv        full / 2021-23 / 2024-26 performance by strategy
-  backtest_4w_distribution.csv rolling 4-week return distribution
-  week1_variants/             week-1 alternatives (EW, GMV, tilt k=1/3, top4)
-ledger.md                     append-only weekly record of realised returns
-```
-
----
-
-## 4. Weekly workflow
+## 1. 快速开始 / Quick start
 
 ```powershell
 $env:MKL_THREADING_LAYER = 'SEQUENTIAL'
 $py = 'C:\Users\Administrator\miniforge3\envs\dase7310\python.exe'
+cd D:\Backup\Documents\dase7310\DASE7310_GP2_Repo
 
-# 0) Friday after close: refresh both raw and hfq prices
+# 拉数据 / refresh raw + hfq prices and HSI/HSTECH
 & $py portfolio.py refresh-data --end 2026-11-06
 
-# 1) Build the next week's portfolio (uses previous week's submitted shares for C_{i-1})
-& $py portfolio.py build --week 2 --cutoff 2026-11-06 --strategy gmv
+# 生成下一周组合 / build next week's portfolio
+& $py portfolio.py build --week 2 --cutoff 2026-11-06 --strategy capm --lam 15
 
-# 2) Check the snapshot, then upload weeks/week2/submission.xlsx to Moodle
-#    Checklist: cutoff correct, 10 stocks, sum weights = 1, C matches, shares = c/p
-
-# 3) After the trading week ends: record realised values (append-only)
+# 目标周结束后记录实际收益 / record realised results (append-only)
 & $py portfolio.py evaluate --week 1
 ```
 
-The `build` command for week *N* reads `weeks/week{N-1}/portfolio.csv` and values the
-submitted shares at the new cutoff, so `C_{i-1}` is the actual remaining capital, not
-the initial 1,000,000.
+---
+
+## 2. 仓库文件导引 / Repository map
+
+| 文件 / File | 中文说明 / Chinese | English |
+|---|---|---|
+| `README.md` | 本文件：中文文件导引 + 双语计划 | This file: Chinese guide + bilingual plan |
+| `README_EN.md` | 完整英文技术说明 | Full English technical README |
+| `TEAM_GUIDANCE_ZH.md` | **队友执行手册**：规则、流程、分工、AI prompt | Team playbook: rules, workflow, roles, AI prompt |
+| `GUIDE_ZH.md` | 第 1 周中文行动指南 | Week 1 action guide (Chinese) |
+| `WEEK2_GUIDANCE_ZH.md` | 第 2 周 CAPM 操作指南 | Week 2 CAPM guide |
+| `WEEK3_GUIDANCE_ZH.md` | 第 3 周信号操作指南 | Week 3 signal guide |
+| `BENCHMARKS_ZH.md` | **课程六类 benchmark 对照**（老师要求） | Course benchmark mapping and comparison |
+| `GMV_EXPLAINED_ZH.md` | 协方差矩阵 + GMV 原理 | Covariance matrix and GMV explainer |
+| `VIEWS_EXPLAINED_ZH.md` | 如何表达观点（CAPM/信号/自适应） | How to express views in Weeks 2–4 |
+| `WEEK1_REPORT_EN.md` | 第 1 周英文报告（内部版，非最终提交） | Week 1 English report (internal draft) |
+| `portfolio.py` | 主脚本：`refresh-data / build / evaluate` | Main pipeline |
+| `research_benchmarks.py` | 课程 benchmark 对比 + 有效前沿 + 两基金 | Course benchmarks, frontier, two-fund check |
+| `research_backtest.py` | 策略 walk-forward 回测 | Strategy backtest |
+| `research_views.py` | 无观点 → 有观点的权重路径 | View intensity path |
+| `research_gmv.py` | 协方差 + GMV 复现 | Covariance and GMV reproduction |
+| `research_scan.py` | 信号 IC / 相关性扫描 | Signal IC and correlation scan |
+| `research_portfolios.py` | 组合方案比较 | Portfolio comparison |
+| `data/` | 原始/后复权价格、周收益、指数、meta | Raw/hfq prices, returns, indices, metadata |
+| `weeks/weekN/` | 每周提交快照与实际结果 | Weekly submission snapshots and realised results |
+| `research/` | 所有研究 CSV 输出 | All research CSV outputs |
+| `ledger.md` | 周度实际收益台账（append-only） | Weekly realised-return ledger |
 
 ---
 
-## 5. Method roadmap (deliberate, course-aligned progression)
+## 3. 计划 / Plan（双语）
 
-The project asks the method to **evolve based on realised weekly performance**. We
-start from the simplest result in the course and add one layer per week.
+| 周 / Week | 估值截点 / Cutoff | 提交截止 / Submit by | 方法 / Method | 输出 / Output |
+|---|---|---|---|---|
+| **1** | 2026-10-30 | 2026-11-01 | **GMV**：只用协方差，纯多头 1%–25% / risk-only global minimum variance | `weeks/week1/submission.xlsx` |
+| **2** | 2026-11-06 | 2026-11-08 | **CAPM / SML**：`μ_s = r_f + β_s × premium`，λ=15 / market view | `weeks/week2/submission.xlsx` |
+| **3** | 2026-11-13 | 2026-11-15 | **Signal**：12 周动量 + 距 52 周高点 + 低波动，λ=8 / relative stock view | `weeks/week3/submission.xlsx` |
+| **4** | 2026-11-20 | 2026-11-22 | **Adaptive**：按前 3 周累计主动收益调整 λ / confidence update | `weeks/week4/submission.xlsx` |
+| — | — | **2026-11-30** | 5 页报告 + 互评 / 5-page report + peer evaluation | 最终报告 / final report |
+| — | — | **2026-11-23 / 30** | 10 分钟展示，覆盖 GP1 + GP2 / 10-min presentation | slides |
 
-### Week 1 — Global Minimum Variance (GMV), long-only
-- Lecture 2/3: `min w'Σw  s.t. 1'w = 1`.
-- Only the covariance matrix is estimated; **no expected returns**. This is deliberate:
-  GP1 showed weekly mean returns are essentially unpredictable, and sample means make
-  Markowitz weights unstable.
-- 104-week covariance, 30% shrinkage to diagonal, single-name floor 1% / cap 25%,
-  long-only. All 10 stocks are held.
-- Backtest (2021–2026, weekly, gross): 8.39% p.a., 8.41% vol, Sharpe 0.76
-  (course definition, `r_f = 2%`), max DD −11.3%; 4-week 5th percentile −3.1%.
-  It beat EW in the weak 2021–23 period (+3.7% vs +1.2%) but lagged in the 2024–26
-  rally (+17.0% vs +18.1%).
+**规则 / Rules**：HKD 1,000,000；`Σw = 1`；10 只股票；不做空；周内 buy-and-hold；全程最多 3 次调整（第 2/3/4 周各一次）。
 
-### Week 2 — CAPM equilibrium view (Lecture 4)
-- Lecture 4: `mu_s = r_f + beta_s * market_premium`; beta estimated by regression on HSI.
-- This is a **market view** (high-beta stocks should earn more), not a stock-picking view.
-- Use a conservative risk aversion (`lambda` large) or a 9–10% vol target, so the
-  portfolio moves only slightly up the frontier from GMV.
-- Note: shrinking all means toward the grand mean is just adding a constant; because
-  `1'w = 1`, it does **not** change the optimal weights. Meaningful shrinkage must be
-  toward zero, toward CAPM, or via Black–Litterman.
-- Compare GMV, CAPM and EW on the first realised week before adopting.
-
-### Week 3 — Signal-based relative view
-- Replace the equilibrium mean with a robust composite signal: 12-week momentum +
-  distance from the 52-week high + low volatility (equal-weight z-scores).
-- This is a **relative stock view**: overweight the high-score names, underweight the
-  low-score names. Still long-only, same floor/cap, 10–12% vol target.
-- The composite has a positive rank IC in every year of the sample (near-high IC 0.09,
-  t ≈ 3.3), unlike raw sample means. The sample-mean view would put 25% in SMIC (0981)
-  because of its 41% historical mean; the signal view keeps it at 1%.
-
-### Week 4 — Adaptive view confidence
-- Pre-registered: if cumulative active return vs EW is below −5pp at a rebalance,
-  cut the view strength (raise `lambda` / lower the vol target) back toward GMV;
-  if above +5pp, keep the view but do not add leverage.
-- Record the decision and its reason in `params.json`.
-
-`k` (used by the `tilt` strategy) is the **active-bet multiplier**, not leverage:
-start from EW, scale every deviation from EW by `k`, keep `sum w = 1`. With
-`k = 1` the tilt is the base 10% tracking-error tilt; `k = 2` doubles the active
-positions; `k = 3` triples them. In the current long-only implementation, negative
-tilts are clipped to zero, so large `k` mainly increases concentration.
+**English**: HKD 1,000,000 fully invested in ten stocks; long-only; buy-and-hold within each week; at most three rebalancing adjustments (before Weeks 2, 3 and 4).
 
 ---
 
-## 6. Benchmark set for the report
+## 4. 每周思路 / Weekly methodology（双语）
 
-The project brief asks for a comparison with **the benchmark methods covered in class**.
-Lectures 2–4 define six benchmark families (full mapping, formulas and report-ready text
-in `BENCHMARKS_ZH.md`):
+### Week 1 — GMV（无观点 / no view）
 
-| # | Benchmark | Course | Our implementation |
+**中文**：只用协方差矩阵 `Σ`，不估期望收益 `μ`。解 `min w'Σw s.t. Σw = 1, 0.01 ≤ w ≤ 0.25`。这是有效前沿的**最左端点**，也是唯一不需要 μ 的前沿点。104 周协方差、30% 收缩、SLSQP 求解。
+
+**English**: Use only the covariance matrix; no expected returns. Solve the long-only global minimum-variance problem with 1%–25% caps. GMV is the left endpoint of the efficient frontier and the only frontier point that does not require a `μ` forecast.
+
+**为什么 / Why**：GP1 证明周收益均值几乎不可预测；GMV 避开最难的输入，先建立风险基准。 / GP1 showed weekly mean returns are nearly unpredictable; GMV avoids the noisiest input and establishes a risk benchmark.
+
+### Week 2 — CAPM / SML（市场观点 / market view）
+
+**中文**：`μ_s = r_f + β_s × (μ_M − r_f)`，β 用 HSI 回归；λ=15，沿有效前沿从 GMV 往上走一小步。预期波动约 8.9%，仍然纯多头、1%–25%。
+
+**English**: Use the CAPM/SML expected return with HSI as the market proxy; λ=15 moves the portfolio slightly up the efficient frontier from GMV. Expected volatility ≈ 8.9%, still long-only with 1%–25% caps.
+
+**注意 / Note**：把 μ 往横截面总均值收缩只是加一个常数，不改变权重；真正的观点是 β 的横截面差异。 / Shrinking all means toward the grand mean is just adding a constant and does not change weights; the view is the cross-sectional difference in beta.
+
+### Week 3 — Signal（相对选股观点 / relative stock view）
+
+**中文**：复合 z 分数 = 12 周动量 + 距 52 周高点 + 低波动；`μ_s = κ × z_s`，κ=2%/年；λ=8。仍然纯多头、1%–25%。信号在样本内每年 IC 为正，比原始样本均值稳。
+
+**English**: Build a composite z-score from 12-week momentum, proximity to the 52-week high, and low volatility; use `μ_s = κ z_s` (κ = 2% p.a. per z) with λ=8. The signal has a positive rank IC in every year of the sample and is more stable than raw sample means.
+
+### Week 4 — Adaptive（调整观点置信度 / confidence update）
+
+**中文**：不换模型。按前 3 周累计主动收益（组合 − 等权）调整观点强度：< −5pp 时提高 λ / 降低目标波动，回到 GMV；> +5pp 时维持但不加杠杆。规则提前写进 `params.json`，事后不改。
+
+**English**: Do not switch models. Adjust the strength of the view based on the first three weeks' cumulative active return vs equal weight: if below −5pp, raise λ / lower the vol target toward GMV; if above +5pp, keep the view without adding leverage. Pre-register the rule in `params.json`.
+
+---
+
+## 5. 结果位置 / Where to find results（双语）
+
+### 5.1 每周提交与结果 / Weekly submissions and realised results
+
+| 内容 / Item | 位置 / Location |
+|---|---|
+| Moodle 提交表 / Moodle submission | `weeks/weekN/submission.xlsx` |
+| 同内容 CSV / same table as CSV | `weeks/weekN/submission.csv` |
+| 完整内部表（价格、权重、资本、股数）/ full table | `weeks/weekN/portfolio.csv` |
+| 参数、截点、方法、权重 / parameters | `weeks/weekN/params.json` |
+| 人类可读快照 / human-readable snapshot | `weeks/weekN/report.md` |
+| 目标周实际结果 / realised results | `weeks/weekN/realized.csv`、`realized_summary.json` |
+| 周度台账 / weekly ledger | `ledger.md`（append-only） |
+
+### 5.2 课程 benchmark 与研究 / Course benchmarks and research
+
+| 内容 / Item | 位置 / Location |
+|---|---|
+| 课程 benchmark 主表 / main benchmark table | `research/benchmark_summary.csv` |
+| 4 周收益分布 / 4-week distribution | `research/benchmark_4w_distribution.csv` |
+| 各方法最终权重 / final weights | `research/benchmark_final_weights.csv` |
+| 有效前沿 / efficient frontier | `research/frontier_20261030.csv` |
+| 各方法离前沿的缺口 / frontier gaps | `research/frontier_points.csv` |
+| 两基金定理检查 / two-fund check | `research/two_fund_check.csv` |
+| 原始切点组合诊断 / raw tangency diagnostic | `research/benchmark_diagnostics.csv` |
+| 策略回测 / strategy backtest | `research/backtest_summary.csv` |
+| 信号 IC / signal IC | `research/scan_ic.csv` |
+| 协方差 / covariance | `research/covariance_104w.csv` |
+| 相关系数 / correlation | `research/correlation_104w.csv` |
+| GMV 权重与风险贡献 / GMV weights & risk contributions | `research/gmv_weights.csv` |
+| 收缩敏感性 / shrinkage sensitivity | `research/shrinkage_sensitivity.csv` |
+| 观点强度路径 / view intensity path | `research/views_frontier.csv` |
+
+### 5.3 报告与展示 / Report and presentation
+
+| 内容 / Item | 位置 / Location |
+|---|---|
+| 第 1 周英文报告（内部版）/ Week 1 report draft | `WEEK1_REPORT_EN.md` |
+| 课程 benchmark 报告写法 / report-ready benchmark text | `BENCHMARKS_ZH.md` |
+| 最终 5 页报告 / final 5-page report | **待写 / to be written**（建议基于 `WEEK1_REPORT_EN.md` + `BENCHMARKS_ZH.md`） |
+| 展示 slides / presentation | **待写 / to be written**（建议按 `TEAM_GUIDANCE_ZH.md` 第 8 节） |
+
+> **规则 / Rule**：报告里每个数字都必须能指到上面的 CSV/JSON；表下面写 `Source: research/xxx.csv`。
+
+---
+
+## 6. 数据 / Data（双语）
+
+### 6.1 数据文件 / Data files
+
+| 文件 / File | 中文说明 / Chinese | English |
+|---|---|---|
+| `data/weekly_closes_raw.csv` | **未复权**周收盘价，用于算股数和资本 | **Raw** weekly closes; used for shares and capital |
+| `data/weekly_closes_hfq.csv` | **后复权**周收盘价，用于算信号/协方差 | **hfq** weekly closes; used for signals and covariance |
+| `data/weekly_returns_raw.csv` | 未复权周收益 | Raw weekly returns |
+| `data/weekly_returns_hfq.csv` | 后复权周收益 | hfq weekly returns |
+| `data/daily_closes_raw.csv` | 未复权日线 | Raw daily closes |
+| `data/daily_closes_hfq.csv` | 后复权日线 | hfq daily closes |
+| `data/index_closes.csv` | HSI / HSTECH 周收盘 | HSI / HSTECH weekly closes |
+| `data/index_returns.csv` | HSI / HSTECH 周收益 | HSI / HSTECH weekly returns |
+| `data/meta.json` | 数据源、刷新时间、最后日期 | Source, refresh time, last available date |
+
+### 6.2 口径 / Conventions
+
+**中文**：
+
+- 数据源：新浪财经（AkShare），后复权/未复权两套；本网络下东方财富常被拒，脚本整批切新浪。
+- 周价格：每周 **W-FRI** 最后一根已实现收盘价。
+- 算股数：`h = c / p`，`p` 用**未复权真实收盘价**；保留 6 位小数，不按每手取整。
+- 算信号/协方差：用**后复权**总收益；104 周窗口、30% 收缩。
+- 初始资本 `C_0 = 1,000,000`；第二周起 `C_{i-1}` 是上一周实际剩余资本。
+- 组合约束：`Σw = 1`、10 只都持有、单票 1%–25%、不做空。
+
+**English**:
+
+- Source: Sina Finance via AkShare; both raw and hfq series. Eastmoney is often blocked on this network, so the pipeline falls back batch-wise.
+- Weekly price: last realised close of each **W-FRI** week.
+- Shares: `h = c / p` using **raw** closes; 6 decimals, no board-lot rounding.
+- Signals/covariance: **hfq** total returns; 104-week window, 30% shrinkage.
+- Initial capital `C_0 = 1,000,000`; from Week 2, `C_{i-1}` is the actual remaining capital.
+- Constraints: `Σw = 1`, all ten stocks held, 1%–25% per name, long-only.
+
+### 6.3 股票池 / Universe
+
+`9988 阿里巴巴 / Alibaba`, `0066 港铁 / MTR`, `1398 工行 / ICBC`, `3988 中行 / BOC`,
+`0981 中芯 / SMIC`, `0005 汇丰 / HSBC`, `1810 小米 / Xiaomi`, `0016 新鸿基 / SHK Properties`,
+`1113 长实 / CK Asset`, `0700 腾讯 / Tencent`.
+
+---
+
+## 7. 课程 benchmark 速查 / Course benchmark quick reference
+
+项目 PDF 要求对比“老师课上讲过的 benchmark methods”。Lecture 2–4 的六类是：
+
+| # | Benchmark | 课程 / Lecture | 我们的文件 / Our file |
 |---|---|---|---|
-| 1 | Equal weight (1/N) | Lecture 2 | `EW` |
-| 2 | Global minimum variance | Lecture 2/3 | `GMV_uncon` (formula) / `GMV_con` (long-only 1–25%) |
-| 3 | Mean-variance efficient frontier | Lecture 3 | `frontier_20261030.csv`, `frontier_points.csv` |
-| 4 | Tangency / max Sharpe | Lecture 3 | `Tangency_uncon_cap2` (gross ≤ 2) / `Tangency_con` |
-| 5 | Two-fund theorem | Lecture 3 | `two_fund_check.csv` |
-| 6 | CAPM / SML / market portfolio | Lecture 4 | `CAPM_con`, `Market_HSI` |
+| 1 | 等权 1/N / equal weight | Lecture 2 | `EW` in `benchmark_summary.csv` |
+| 2 | GMV | Lecture 2/3 | `GMV_uncon` / `GMV_con` |
+| 3 | 有效前沿 / efficient frontier | Lecture 3 | `frontier_20261030.csv`、`frontier_points.csv` |
+| 4 | 切点 / max Sharpe | Lecture 3 | `Tangency_uncon_cap2` / `Tangency_con` |
+| 5 | 两基金定理 / two-fund theorem | Lecture 3 | `two_fund_check.csv` |
+| 6 | CAPM / SML / 市场组合 | Lecture 4 | `CAPM_con`、`Market_HSI` |
 
-Main table (`research/benchmark_summary.csv`, 2021-01 → 2026-10, weekly, gross,
-Sharpe with `r_f = 2%`):
+**完整公式、主表、报告写法**：`BENCHMARKS_ZH.md`（中文）。
+**Full formulas, tables and report-ready English**: `README_EN.md` Section 6.
 
-| Method | Course link | Ann. ret | Ann. vol | Sharpe | Max DD | Active vs EW |
-|---|---|---:|---:|---:|---:|---:|
-| **Signal (proposed)** | characteristic view | **8.70%** | **8.41%** | **0.80** | **−11.6%** | **+2.22%** |
-| GMV_uncon | Lecture 2/3 formula | 8.13% | 7.89% | 0.78 | −10.7% | +1.65% |
-| GMV_con | Lecture 2/3 + constraints | 8.39% | 8.41% | 0.76 | −11.3% | +1.93% |
-| Tilt k=2 | direct signal tilt | 10.79% | 11.92% | 0.74 | −15.0% | +4.48% |
-| CAPM_con | Lecture 4 CAPM/SML | 8.03% | 8.50% | 0.71 | −12.5% | +1.61% |
-| Top-4 | concentrated signal | 9.90% | 13.41% | 0.59 | −23.2% | +3.86% |
-| Tangency_uncon_cap2 | Lecture 3 + gross ≤ 2 | 10.44% | 14.71% | 0.57 | −27.3% | +4.53% |
-| Tangency_con | Lecture 3 + constraints | 8.26% | 14.25% | 0.44 | −30.3% | +2.48% |
-| Equal weight | Lecture 2, 1/N | 5.31% | 16.23% | 0.20 | −33.0% | 0 |
-| Market (HSI) | Lecture 4 market proxy | −3.76% | 22.25% | −0.26 | −49.3% | −7.85% |
-
-> `Tangency_con` is clipped but still allows small short positions
-> (`w ∈ [−10%, 40%]`), so it is not directly comparable with the long-only frontier.
-
-Two additional course-linked checks:
-
-- **Efficient frontier** (`research/frontier_points.csv`, in-sample 104w): GMV_con is
-  0.10pp below the frontier, Signal_con 0.22pp, CAPM_con 0.50pp, while EW is 7.38pp
-  below. The tangency portfolios are on the frontier within 0.2pp grid error.
-- **Two-fund theorem** (`research/two_fund_check.csv`): the L1 weight distance from the
-  GMV–tangency span is 0.046 for GMV_con, 0.104 for CAPM_con, 0.174 for Signal_con, and
-  0.897 for EW. The theorem is exact only without constraints; our implementation is
-  long-only with caps, so this is an approximate check.
-
-> The raw unconstrained tangency formula `Σ⁻¹(μ − r_f)` is **not implementable** with
-> sample means: average gross 34.8, 363.7% annualised volatility, −652% worst week. It is
-> kept as a diagnostic in `research/benchmark_diagnostics.csv` and is the clearest
-> illustration of why the Week 1 portfolio starts from GMV rather than from sample means.
+> **Lecture 5–7 不是 GP2 benchmark**：它们是衍生品/固定收益（对冲、利率、期货、期权），主要服务 final exam 和 presentation。详见 `BENCHMARKS_ZH.md` 第 8 节。
 
 ---
 
-## 7. Report / presentation material already collected
+## 8. 提交前检查清单 / Pre-submission checklist
 
-- Method evolution chain: GMV (no view) → CAPM (market view) → signal (relative view) →
-  adaptive (confidence update).
-- Signal IC by year (`research/scan_ic.csv`): momentum and near-52-week-high are
-  positive in most years; 1-week reversal is not a reliable signal.
-- The 0981 (SMIC) case: 46–57% annualised vol, −32% in the four weeks to 30 Oct 2026.
-  Any portfolio that overweights it bears a large idiosyncratic risk; GMV gives it
-  only 1.7%.
-- Estimation error: the raw unconstrained tangency formula has average gross 34.8,
-  363.7% annualised volatility and a −652% worst week; even the constrained version has
-  a −30.3% max drawdown. This is the clearest illustration of why shrinking means and
-  imposing constraints matters.
-- Regime dependence: 2021–23 vs 2024–26 rankings flip for several strategies; a
-  single 20-week window would overstate progress (the same lesson as GP1).
+- [ ] `params.json` 的 `cutoff` = 本周五 / cutoff is the correct Friday;
+- [ ] `capital_prev` = 上周实际剩余资本 / previous week's actual remaining capital;
+- [ ] 10 行，`Σw = 1`，无负权重，单票 ≥ 1% / ten rows, weights sum to 1, no shorts, each ≥ 1%;
+- [ ] `股数 × 价格 ≈ 资本` / `shares × price ≈ capital`;
+- [ ] Excel 与 CSV 数字一致 / Excel and CSV agree;
+- [ ] Moodle 上传成功 / Moodle upload confirmed;
+- [ ] `ledger.md` 已记录上一周实际结果 / previous week's realised result is in the ledger.
 
 ---
 
-## 8. Environment
+## 9. 常见坑 / Common pitfalls
+
+1. **截点错周 / wrong cutoff**：第 2 周用 11/6，不是 10/30。
+2. **用复权价算股数 / adjusted prices for shares**：会差几倍；记住“信号 hfq，股数 raw”。
+3. **忘记用上周剩余资本 / ignoring `C_{i-1}`**：第 2 周起不是 1,000,000。
+4. **权重和不为 1 / weights don't sum to 1**：提交前看 Summary。
+5. **Moodle 没传成功 / upload not confirmed**：GP1 Week 4 的教训。
+6. **改旧快照 / editing old snapshots**：只增不改；要改就新建 `_variant` + 修订说明。
+7. **把 `k` 当杠杆 / treating `k` as leverage**：`k` 只放大主动偏离，权重和始终为 1。
+8. **把 HSI 当可提交组合 / treating HSI as investable**：HSI 只是市场 benchmark，不是 10 只股票的组合。
+
+---
+
+## 10. 环境 / Environment
 
 ```powershell
-$env:MKL_THREADING_LAYER = 'SEQUENTIAL'   # required before any sklearn/scipy fit on this machine
+$env:MKL_THREADING_LAYER = 'SEQUENTIAL'
 $py = 'C:\Users\Administrator\miniforge3\envs\dase7310\python.exe'
 ```
 
-Python 3.12, pandas 3.0.6, numpy 2.5.3, scipy 1.18.1, akshare 1.19.1,
-scikit-learn 1.9.1, openpyxl. Data source: Sina Finance via AkShare (Eastmoney is
-blocked on this network; the pipeline falls back batch-wise).
+Python 3.12、pandas 3.0、numpy 2.5、scipy 1.18、akshare 1.19、scikit-learn 1.9、openpyxl。
+完整依赖见 `requirements.txt`；环境锁定见 `README_EN.md` 第 8 节。
+
+---
+
+## 11. 文档阅读顺序 / Reading order
+
+1. **`README.md`**（本文件）— 5 分钟了解仓库和计划。
+2. **`TEAM_GUIDANCE_ZH.md`** — 要执行第 2/3/4 周的人必读；含 AI prompt。
+3. **`WEEK2_GUIDANCE_ZH.md` / `WEEK3_GUIDANCE_ZH.md`** — 当周具体操作。
+4. **`BENCHMARKS_ZH.md`** — 写报告 comparison 小节必读。
+5. **`GMV_EXPLAINED_ZH.md` / `VIEWS_EXPLAINED_ZH.md`** — 想理解原理时读。
+6. **`README_EN.md`** — 需要完整英文技术说明时读。

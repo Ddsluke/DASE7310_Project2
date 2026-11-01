@@ -391,7 +391,8 @@ BENCHMARKS_ZH.md
 
 | 文件 | 用途 |
 |---|---|
-| `README.md` | 英文完整说明（规则、数据、流程、方法） |
+| `README.md` | 中文主 README（文件导引 + 双语计划） |
+| `README_EN.md` | 英文完整技术说明（规则、数据、流程、方法） |
 | `GUIDE_ZH.md` | 第 1 周中文行动指南 |
 | `WEEK2_GUIDANCE_ZH.md` | 第 2 周 CAPM 操作指南 |
 | `WEEK3_GUIDANCE_ZH.md` | 第 3 周信号操作指南 |
