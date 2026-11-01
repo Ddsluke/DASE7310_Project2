@@ -77,6 +77,10 @@ research_portfolios.py        tilt / top-k / GMV comparison
 research_backtest.py          walk-forward backtest of all production strategies
 research_gmv.py               covariance matrix + GMV step-by-step (teaching/repro)
 research_views.py             from no-view GMV to mean-variance views (CAPM / signal)
+GUIDE_ZH.md                   Chinese Week 1 action guide
+WEEK1_REPORT_EN.md            English Week 1 report (internal, not the final submission)
+WEEK2_GUIDANCE_ZH.md          Week 2 guide: CAPM equilibrium view
+WEEK3_GUIDANCE_ZH.md          Week 3 guide: signal view
 GMV_EXPLAINED_ZH.md           Chinese explainer: covariance matrix and GMV
 VIEWS_EXPLAINED_ZH.md         Chinese explainer: how to express views in weeks 2-4
 data/

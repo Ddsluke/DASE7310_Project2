@@ -269,6 +269,9 @@ cd D:\Backup\Documents\dase7310\DASE7310_GP2_Repo
 | `research/gmv_weights.csv` | 无约束/带约束 GMV 权重 + 风险贡献 |
 | `GMV_EXPLAINED_ZH.md` | 协方差矩阵与 GMV 的逐步讲解 |
 | `VIEWS_EXPLAINED_ZH.md` | 第二、三、四周如何表达观点（CAPM/信号/自适应） |
+| `WEEK2_GUIDANCE_ZH.md` | 第二周行动指南（CAPM 观点） |
+| `WEEK3_GUIDANCE_ZH.md` | 第三周行动指南（信号观点） |
+| `WEEK1_REPORT_EN.md` | 第一周英文报告（内部总结，非最终提交版） |
 | `research_gmv.py` | 复现协方差与 GMV 的脚本 |
 | `research_views.py` | 复现“无观点 → 有观点”权重变化的脚本 |
 | `ledger.md` | 周度实际收益台账（只追加） |
