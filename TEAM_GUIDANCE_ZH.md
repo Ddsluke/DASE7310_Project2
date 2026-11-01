@@ -244,6 +244,8 @@ Get-Content data\meta.json
 | 5 | 两基金定理 | Lecture 3 | `two_fund_check.csv` |
 | 6 | CAPM / SML / 市场组合 | Lecture 4 | `CAPM_con` / `Market_HSI` |
 
+> **Lecture 5–7 不是 GP2 benchmark**：L5 是衍生品/对冲（minimum variance hedge ratio），L6 是利率/零息曲线/FRA，L7 是期货/期权/short selling。它们主要服务 final exam 和 presentation，不是组合 comparison。唯一可写进“potential improvement”的是：L5 的 HSI 期货对冲比率、L6 的零息曲线 r_f、L7 的 short selling 保证金/借券成本。详见 `BENCHMARKS_ZH.md` 第 8 节。
+
 **详细公式、主对比表、有效前沿缺口、两基金检查、报告写法**都在：
 
 ```

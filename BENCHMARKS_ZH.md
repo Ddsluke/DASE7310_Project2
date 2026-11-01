@@ -338,7 +338,26 @@ cd D:\Backup\Documents\dase7310\DASE7310_GP2_Repo
 
 ---
 
-## 8. 一句话总结
+## 8. Lecture 5–7 与 GP2 的关系（已逐页检查）
+
+很多同学会问：“后面几讲是不是也有组合 benchmark？”答案是：**没有**。Lecture 5–7 是衍生品与固定收益，不是 GP2 的组合构建方法。
+
+| Lecture | 主题 | 和 GP2 的关系 |
+|---|---|---|
+| **Lecture 5** | Derivatives markets、forward/futures、hedging strategies | 唯一相关的是 **minimum variance hedge ratio** `h* = ρ σ_S / σ_F` 和 hedge effectiveness `e = ρ²`（slide 29–31）。这是“用期货对冲”的比率，**不是** GMV 组合。GP2 只允许 10 只股票，不能用 HSI 期货，所以不作为 benchmark；可以作为“potential improvement”提一句。 |
+| **Lecture 6** | Important interest rates、zero rates、bond pricing、forward rates、FRA | 和股票组合没有直接关系。唯一用到的是无风险利率 `r_f`；我们用 2% 的平坦利率。更精确的做法是用 HK 零息曲线（Lecture 6），但对 4 周组合影响是二阶的，可作为 improvement。 |
+| **Lecture 7** | Futures/forward prices、stock index futures、margin、options | 和 GP2 直接相关的是 **short selling**（slide 4）和 **stock index futures**（slide 18–21）。项目允许做空，但我们组选择不做；HSI 期货/期权不在允许的股票池里。可以在报告里引用 short-selling 的保证金/借券成本，解释为什么我们选择 long-only。 |
+
+**结论：**
+
+- GP2 的 benchmark 全部在 **Lecture 2–4**：1/N、GMV、有效前沿、切点/最大 Sharpe、两基金定理、CAPM/SML/市场组合。
+- Lecture 5–7 主要服务 **final exam（70%）** 和 **oral presentation**（课程 schedule 里的 futures、swaps、options、binomial trees、Black-Scholes），不是 GP2 的组合 comparison。
+- 如果老师问“你们有没有考虑衍生品对冲”，可以答：
+  > “We read the hedging material in Lecture 5. If HSI futures were allowed, the minimum-variance hedge ratio `h* = ρ σ_p / σ_f` could reduce market risk; the project restricts the universe to the ten stocks, so we stayed long-only and used the 1%/25% constraints instead.”
+
+---
+
+## 9. 一句话总结
 
 > 老师讲过的 benchmark 不是“随便找几个策略”，而是 **1/N、GMV、有效前沿、切点/最大 Sharpe、两基金定理、CAPM/市场组合** 这六类。
 > 我们的对比表要逐一覆盖，并说明“课程公式原样”和“可实施约束版”的区别；其中原始切点组合的爆炸正好证明“为什么不能直接用样本均值”，也是我们第 1 周从 GMV 开始的最好理由。
