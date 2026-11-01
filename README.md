@@ -75,6 +75,8 @@ portfolio.py                  single pipeline: refresh-data / build / evaluate
 research_scan.py              signal IC, correlation, first strategy scan
 research_portfolios.py        tilt / top-k / GMV comparison
 research_backtest.py          walk-forward backtest of all production strategies
+research_gmv.py               covariance matrix + GMV step-by-step (teaching/repro)
+GMV_EXPLAINED_ZH.md           Chinese explainer: covariance matrix and GMV
 data/
   daily_closes_raw.csv        unadjusted daily closes (accounting)
   daily_closes_hfq.csv        adjusted daily closes (signals)
@@ -93,6 +95,9 @@ weeks/weekN/
   realized_summary.json       weekly return, EW benchmark, active return
 research/
   scan_ic.csv                 cross-sectional rank IC of candidate signals
+  covariance_104w.csv         annualised 10x10 covariance matrix (shrunk)
+  correlation_104w.csv        10x10 correlation matrix
+  gmv_weights.csv             unconstrained vs constrained GMV weights + risk contributions
   backtest_summary.csv        full / 2021-23 / 2024-26 performance by strategy
   backtest_4w_distribution.csv rolling 4-week return distribution
   week1_variants/             week-1 alternatives (EW, GMV, tilt k=1/3, top4)
@@ -139,8 +144,8 @@ start from the simplest result in the course and add one layer per week.
 - 104-week covariance, 30% shrinkage to diagonal, single-name floor 1% / cap 25%,
   long-only. All 10 stocks are held.
 - Backtest (2021–2026, weekly, gross): 8.39% p.a., 8.41% vol, Sharpe 1.00, max DD
-  −11.3%; 4-week 5th percentile −3.1%. It beat EW in both sub-periods
-  (2021–23: +3.7% vs +1.2%; 2024–26: +17.0% vs +18.1%).
+  −11.3%; 4-week 5th percentile −3.1%. It beat EW in the weak 2021–23 period
+  (+3.7% vs +1.2%) but lagged in the 2024–26 rally (+17.0% vs +18.1%).
 
 ### Week 2 — Mean–variance efficient frontier with shrunk means
 - Lecture 3: move up from GMV along the frontier.
