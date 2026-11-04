@@ -105,6 +105,8 @@ cd D:\Backup\Documents\dase7310\DASE7310_GP2_Repo
 
 **规则 / Rules**：HKD 1,000,000；`Σw = 1`；10 只股票；不做空；周内 buy-and-hold；全程最多 3 次调整（第 2/3/4 周各一次）。
 
+> **1% 下限 / 1% floor**：`GMV_con` 的 9988、1810、0700 三只正好在 1% 下限；不设下限时优化器会把它们设为 0。1% 下限保证 10 只都持有，代价是样本波动 8.53%→8.77%、样本均值 15.78%→15.36%。这是**实现约束**，不是理论 GMV；完整敏感性表见 [WEEK1_REPORT_EN.md](WEEK1_REPORT_EN.md) §3.4。
+
 **English**: HKD 1,000,000 fully invested in ten stocks; long-only; buy-and-hold within each week; at most three rebalancing adjustments (before Weeks 2, 3 and 4).
 
 ---

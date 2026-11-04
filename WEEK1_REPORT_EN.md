@@ -159,6 +159,45 @@ On our data this solution shorts 9988 (−3.6%) and 1810 (−1.7%) and puts 39.7
 and 29.2% in 3988. Those short positions are not permitted by the group's long-only
 choice, which is why the constrained numerical solution is used.
 
+### 3.4 Implementation constraints: the 1% floor and 25% cap
+
+The course GMV is unconstrained. Our submission adds two implementation constraints:
+
+```
+0.01 <= w_s <= 0.25
+```
+
+**Why the 1% floor?** The project requires the portfolio to be fully allocated
+**across the ten selected stocks**. Without a floor, the optimizer sets three names to
+zero: 9988 (46.1% annualised volatility), 1810 (40.6%) and 0700 (28.4%), because their
+volatilities are high relative to the low-volatility bank/transport core. A zero weight
+would still use the ten-stock universe, but it would not hold all ten names; the 1%
+floor removes that ambiguity. The 25% cap prevents the opposite problem: without it,
+GMV puts about 39.7% in 0066 and 29.2% in 3988.
+
+**What does the floor cost?** The table below compares the constrained GMV at different
+floors (cap fixed at 25%, same 104-week covariance). Volatility is checked against the
+**sample** covariance, and the expected return is the in-sample 104-week mean; it is
+shown only to illustrate the direction of the constraint cost, not as a forecast.
+
+| Floor | 9988 | 1810 | 0700 | 0981 | Sample vol | In-sample mean | Names at floor |
+|---:|---:|---:|---:|---:|---:|---:|---|
+| 0% | 0.00% | 0.00% | 0.00% | 2.01% | 8.53% | 15.78% | 3 names at zero |
+| 0.5% | 0.50% | 0.50% | 0.50% | 1.84% | 8.64% | 15.57% | 3 |
+| **1% (submitted)** | **1.00%** | **1.00%** | **1.00%** | **1.68%** | **8.77%** | **15.36%** | **3** |
+| 2% | 2.00% | 2.00% | 2.00% | 2.00% | 9.09% | 15.06% | 4 (0981 also) |
+
+At the 1% floor, the cost relative to the unconstrained GMV is **+0.24pp of sample
+volatility** (8.53% → 8.77%) and **−0.42pp of in-sample expected return** (15.78% →
+15.36%). The three floor names contribute 2.5% (9988), 2.0% (1810) and 1.4% (0700) of
+total portfolio risk, so the floor is a small but non-trivial diversification
+constraint.
+
+The floor and cap are **our implementation choices**, not part of the theoretical GMV.
+In the benchmark comparison we therefore report both `GMV_uncon` (the course formula,
+which allows zero and short positions) and `GMV_con` (the implementable version with the
+1% floor and 25% cap).
+
 ---
 
 ## 4. Week 1 portfolio
@@ -185,6 +224,11 @@ All ten stocks are held. Weights sum to 1.000000. Shares follow `h = c / p` to s
 decimals; no board-lot rounding is applied, because the course formula allows
 fractional shares and board-lot rounding would leave capital uninvested. The sum of
 `shares × price` is HKD 999,999.9998, a rounding difference of HKD 0.0002.
+
+Three names (9988, 1810, 0700) sit at the 1% floor. This is a deliberate implementation
+constraint: without it, the optimizer would set them to zero because of their high
+volatilities. The cost is small (+0.24pp sample volatility and −0.42pp in-sample mean);
+see §3.4 for the sensitivity table.
 
 ---
 
@@ -261,7 +305,7 @@ formula and are shown separately.
 |---|---|---|---:|---:|---:|---:|---:|
 | **Signal (proposed)** | characteristic view | long-only 1–25% | **8.70%** | **8.41%** | **0.80** | **−11.6%** | **+2.22%** |
 | GMV_uncon | Lecture 2/3 formula | shorts allowed | 8.13% | 7.89% | 0.78 | −10.7% | +1.65% |
-| GMV_con | Lecture 2/3 + constraints | long-only 1–25% | 8.39% | 8.41% | 0.76 | −11.3% | +1.93% |
+| GMV_con | Lecture 2/3 + constraints | long-only, 1% floor / 25% cap | 8.39% | 8.41% | 0.76 | −11.3% | +1.93% |
 | Tilt k=2 (robustness) | direct signal tilt | long-only | 10.79% | 11.92% | 0.74 | −15.0% | +4.48% |
 | CAPM_con | Lecture 4 CAPM/SML | long-only 1–25% | 8.03% | 8.50% | 0.71 | −12.5% | +1.61% |
 | Top-4 (robustness) | concentrated signal | long-only | 9.90% | 13.41% | 0.59 | −23.2% | +3.86% |
@@ -269,6 +313,10 @@ formula and are shown separately.
 | Tangency_con | Lecture 3 + clips | long-short, w ∈ [−10%, 40%] | 8.26% | 14.25% | 0.44 | −30.3% | +2.48% |
 | Equal weight | Lecture 2, 1/N | long-only | 5.31% | 16.23% | 0.20 | −33.0% | 0 |
 | Market (HSI) | Lecture 4 market proxy | passive index | −3.76% | 22.25% | −0.26 | −49.3% | −7.85% |
+
+> `GMV_con` uses the 1% floor / 25% cap from §3.4; `GMV_uncon` is the pure course
+> formula. The floor is binding for 9988, 1810 and 0700 and is the main reason the two
+> GMV rows differ.
 
 The proposed signal portfolio has the highest Sharpe ratio in the group and a maximum
 drawdown close to GMV, while equal weight has the worst risk-adjusted performance. The
@@ -398,6 +446,9 @@ portfolio.
 - Beta of 0.32, so it will lag in a strong market rebound;
 - Covariance estimation error remains; the 30% shrinkage is a heuristic, not an
   optimum;
+- The 1% floor forces small positions in 9988, 1810 and 0700; relative to the
+  unconstrained GMV it adds 0.24pp of sample volatility and gives up 0.42pp of in-sample
+  expected return;
 - It ignores all return information, including strong momentum or valuation signals;
 - It is a pure risk-minimisation portfolio, not a return-maximisation portfolio.
 
@@ -491,6 +542,10 @@ min_w   w'Σw
 s.t.    1'w = 1
         0.01 <= w_s <= 0.25
 ```
+
+The 1% floor and 25% cap are **implementation constraints**, not part of the theoretical
+GMV. Without the floor, the optimizer sets 9988, 1810 and 0700 to zero; the floor keeps
+all ten stocks held. The sensitivity table and the cost of the floor are in §3.4.
 
 **Portfolio variance:** `w'Σw`.
 

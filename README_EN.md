@@ -169,6 +169,10 @@ start from the simplest result in the course and add one layer per week.
   Markowitz weights unstable.
 - 104-week covariance, 30% shrinkage to diagonal, single-name floor 1% / cap 25%,
   long-only. All 10 stocks are held.
+- The 1% floor is binding for **9988, 1810 and 0700**; without it the optimizer sets
+  them to zero. The cost is +0.24pp sample volatility (8.53% → 8.77%) and −0.42pp
+  in-sample mean (15.78% → 15.36%); see `WEEK1_REPORT_EN.md` §3.4 for the full table.
+  The floor and cap are implementation constraints, not part of the theoretical GMV.
 - Backtest (2021–2026, weekly, gross): 8.39% p.a., 8.41% vol, Sharpe 0.76
   (course definition, `r_f = 2%`), max DD −11.3%; 4-week 5th percentile −3.1%.
   It beat EW in the weak 2021–23 period (+3.7% vs +1.2%) but lagged in the 2024–26
