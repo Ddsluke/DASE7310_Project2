@@ -97,19 +97,19 @@ cd D:\Backup\Documents\dase7310\DASE7310_GP2_Repo
 | 周 / Week | 估值截点 / Cutoff | 提交截止 / Submit by | 方法 / Method | 输出 / Output |
 |---|---|---|---|---|
 | **1** | 2026-10-30 | 2026-11-01 | **GMV**：只用协方差，纯多头 1%–25% / risk-only global minimum variance | [week1/submission.xlsx](weeks/week1/submission.xlsx) |
-| **2** | 2026-11-06 | 2026-11-08 | **CAPM / SML**：`μ_s = r_f + β_s × premium`，λ=15 / market view | [weeks/](weeks/)（`build --week 2` 生成） |
-| **3** | 2026-11-13 | 2026-11-15 | **Signal**：12 周动量 + 距 52 周高点 + 低波动，λ=8 / relative stock view | [weeks/](weeks/)（`build --week 3` 生成） |
-| **4** | 2026-11-20 | 2026-11-22 | **Adaptive**：按前 3 周累计主动收益调整 λ / confidence update | [weeks/](weeks/)（`build --week 4` 生成） |
+| **2** | 2026-11-06 | 2026-11-08 | **CAPM / SML + short**：`μ_s = r_f + β_s × premium`，λ=15，floor −15% / cap 30% / market view | [weeks/](weeks/)（`build --week 2` 生成） |
+| **3** | 2026-11-13 | 2026-11-15 | **Signal + short**：12 周动量 + 距 52 周高点 + 低波动，λ=8，floor −15% / cap 30% / relative stock view | [weeks/](weeks/)（`build --week 3` 生成） |
+| **4** | 2026-11-20 | 2026-11-22 | **Adaptive + short**：按前 3 周累计主动收益调整 λ / confidence update | [weeks/](weeks/)（`build --week 4` 生成） |
 | — | — | **2026-11-30** | 5 页报告 + 互评 / 5-page report + peer evaluation | 最终报告 / final report（待写 / to be written） |
 | — | — | **2026-11-23 / 30** | 10 分钟展示，覆盖 GP1 + GP2 / 10-min presentation | slides（待写 / to be written） |
 
-**规则 / Rules**：HKD 1,000,000；`Σw = 1`；10 只股票；周内 buy-and-hold；全程最多 3 次调整（第 2/3/4 周各一次）。**做空**：官方明确允许；Week 1 已提交 long-only；Week 2 起计划启用 `--floor -0.15 --cap 0.40`（待组内最终确认）。
+**规则 / Rules**：HKD 1,000,000；`Σw = 1`；10 只股票；周内 buy-and-hold；全程最多 3 次调整（第 2/3/4 周各一次）。**做空**：官方明确允许；Week 1 已提交 long-only；Week 2 起使用 `--floor -0.15 --cap 0.30`。
 
 > **1% 下限 / 1% floor**：`GMV_con` 的 9988、1810、0700 三只正好在 1% 下限；不设下限时优化器会把它们设为 0。1% 下限保证 10 只都持有，代价是样本波动 8.53%→8.77%、样本均值 15.78%→15.36%。这是**实现约束**，不是理论 GMV；完整敏感性表见 [WEEK1_REPORT_EN.md](WEEK1_REPORT_EN.md) §3.4。
 >
-> **官方口径 / Official interpretation**：全部资本必须投到 10 只股票（**no cash / 空仓**）；`Σw = 1` 由 “fully allocated” + `w = c/C` + `C = Σph` 隐含；单只零权重未被明确禁止，1% 下限是我们避免歧义的保守做法；做空官方明确允许（p.1：“short positions are permitted”）；Week 1 已提交 long-only，Week 2 起计划启用 `--floor -0.15 --cap 0.40`。逐条原文见 [TEAM_GUIDANCE_ZH.md](TEAM_GUIDANCE_ZH.md) §1.3。
+> **官方口径 / Official interpretation**：全部资本必须投到 10 只股票（**no cash / 空仓**）；`Σw = 1` 由 “fully allocated” + `w = c/C` + `C = Σph` 隐含；单只零权重未被明确禁止，1% 下限是我们避免歧义的保守做法；做空官方明确允许（p.1：“short positions are permitted”）；Week 1 已提交 long-only，Week 2 起使用 `--floor -0.15 --cap 0.30`。逐条原文见 [TEAM_GUIDANCE_ZH.md](TEAM_GUIDANCE_ZH.md) §1.3。
 
-**English**: HKD 1,000,000 fully invested in ten stocks; long-only; buy-and-hold within each week; at most three rebalancing adjustments (before Weeks 2, 3 and 4).
+**English**: HKD 1,000,000 fully invested in ten stocks; buy-and-hold within each week; at most three rebalancing adjustments (before Weeks 2, 3 and 4). Week 1 is long-only; from Week 2 the group uses the project's short-selling permission with a −15% per-name short cap and a +30% long cap.
 
 ---
 
@@ -125,23 +125,23 @@ cd D:\Backup\Documents\dase7310\DASE7310_GP2_Repo
 
 ### Week 2 — CAPM / SML（市场观点 / market view）
 
-**中文**：`μ_s = r_f + β_s × (μ_M − r_f)`，β 用 HSI 回归；λ=15，沿有效前沿从 GMV 往上走一小步。预期波动约 8.9%，仍然纯多头、1%–25%。
+**中文**：`μ_s = r_f + β_s × (μ_M − r_f)`，β 用 HSI 回归；λ=15，floor −15%、cap 30%，开始使用小空头。预期波动约 8.2%（样本协方差口径），gross 约 1.07。
 
-**English**: Use the CAPM/SML expected return with HSI as the market proxy; λ=15 moves the portfolio slightly up the efficient frontier from GMV. Expected volatility ≈ 8.9%, still long-only with 1%–25% caps.
+**English**: Use the CAPM/SML expected return with HSI as the market proxy; λ=15 with a −15% short cap and a +30% long cap. Expected volatility ≈ 8.2% (sample covariance), gross ≈ 1.07. This is the first week with short positions.
 
 **注意 / Note**：把 μ 往横截面总均值收缩只是加一个常数，不改变权重；真正的观点是 β 的横截面差异。 / Shrinking all means toward the grand mean is just adding a constant and does not change weights; the view is the cross-sectional difference in beta.
 
 ### Week 3 — Signal（相对选股观点 / relative stock view）
 
-**中文**：复合 z 分数 = 12 周动量 + 距 52 周高点 + 低波动；`μ_s = κ × z_s`，κ=2%/年；λ=8。仍然纯多头、1%–25%。信号在样本内每年 IC 为正，比原始样本均值稳。
+**中文**：复合 z 分数 = 12 周动量 + 距 52 周高点 + 低波动；`μ_s = κ × z_s`，κ=2%/年；λ=8，floor −15%、cap 30%。继续使用小空头（9988/1810/0700 等弱科技）。信号在样本内每年 IC 为正，比原始样本均值稳。
 
-**English**: Build a composite z-score from 12-week momentum, proximity to the 52-week high, and low volatility; use `μ_s = κ z_s` (κ = 2% p.a. per z) with λ=8. The signal has a positive rank IC in every year of the sample and is more stable than raw sample means.
+**English**: Build a composite z-score from 12-week momentum, proximity to the 52-week high, and low volatility; use `μ_s = κ z_s` (κ = 2% p.a. per z) with λ=8, a −15% short cap and a +30% long cap. The short book expresses negative views on the weakest names. The signal has a positive rank IC in every year of the sample and is more stable than raw sample means.
 
 ### Week 4 — Adaptive（调整观点置信度 / confidence update）
 
-**中文**：不换模型。按前 3 周累计主动收益（组合 − 等权）调整观点强度：< −5pp 时提高 λ / 降低目标波动，回到 GMV；> +5pp 时维持但不加杠杆。规则提前写进 `params.json`，事后不改。
+**中文**：不换模型。按前 3 周累计主动收益（组合 − 等权）调整观点强度：< −5pp 时提高 λ 到 20、把 floor 从 −15% 收到 −10%（缩小空头），回到 GMV；> +5pp 时维持但不加杠杆。规则提前写进 `params.json`，事后不改。
 
-**English**: Do not switch models. Adjust the strength of the view based on the first three weeks' cumulative active return vs equal weight: if below −5pp, raise λ / lower the vol target toward GMV; if above +5pp, keep the view without adding leverage. Pre-register the rule in `params.json`.
+**English**: Do not switch models. Adjust the strength of the view based on the first three weeks' cumulative active return vs equal weight: if below −5pp, raise λ to 20 and tighten the short cap from −15% to −10% toward GMV; if above +5pp, keep the view without adding leverage. Pre-register the rule in `params.json`.
 
 ---
 
@@ -169,6 +169,7 @@ cd D:\Backup\Documents\dase7310\DASE7310_GP2_Repo
 | 有效前沿 / efficient frontier | [research/frontier_20261030.csv](research/frontier_20261030.csv) |
 | 各方法离前沿的缺口 / frontier gaps | [research/frontier_points.csv](research/frontier_points.csv) |
 | 两基金定理检查 / two-fund check | [research/two_fund_check.csv](research/two_fund_check.csv) |
+| 做空 vs 纯多头回测 / short vs long-only backtest | [research/short_backtest_weekly.csv](research/short_backtest_weekly.csv) |
 | 原始切点组合诊断 / raw tangency diagnostic | [research/benchmark_diagnostics.csv](research/benchmark_diagnostics.csv) |
 | 策略回测 / strategy backtest | [research/backtest_summary.csv](research/backtest_summary.csv) |
 | 信号 IC / signal IC | [research/scan_ic.csv](research/scan_ic.csv) |
@@ -216,7 +217,7 @@ cd D:\Backup\Documents\dase7310\DASE7310_GP2_Repo
 - 算股数：`h = c / p`，`p` 用**未复权真实收盘价**；保留 6 位小数，不按每手取整。
 - 算信号/协方差：用**后复权**总收益；104 周窗口、30% 收缩。
 - 初始资本 `C_0 = 1,000,000`；第二周起 `C_{i-1}` 是上一周实际剩余资本。
-- 组合约束：`Σw = 1`、10 只都持有、单票 1%–25%、不做空。
+- 组合约束：`Σw = 1`、10 只都持有；Week 1 单票 1%–25%、不做空；Week 2 起单票 −15%–30%、允许做空。
 
 **English**:
 
@@ -261,7 +262,7 @@ cd D:\Backup\Documents\dase7310\DASE7310_GP2_Repo
 
 - [ ] `params.json` 的 `cutoff` = 本周五 / cutoff is the correct Friday;
 - [ ] `capital_prev` = 上周实际剩余资本 / previous week's actual remaining capital;
-- [ ] 10 行，`Σw = 1`，无负权重，单票 ≥ 1% / ten rows, weights sum to 1, no shorts, each ≥ 1%;
+- [ ] 10 行，`Σw = 1`；Week 1：无负权重、单票 ≥ 1%；Week 2 起：空头 ≥ −15%、多头 ≤ 30% / ten rows, sum to 1; Week 1 no shorts, each ≥ 1%; Week 2+ short ≥ −15%, long ≤ 30%;
 - [ ] `股数 × 价格 ≈ 资本` / `shares × price ≈ capital`;
 - [ ] Excel 与 CSV 数字一致 / Excel and CSV agree;
 - [ ] Moodle 上传成功 / Moodle upload confirmed;

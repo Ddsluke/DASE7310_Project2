@@ -215,6 +215,8 @@ R_i − r_f = α_i + β_i (R_M − r_f) + ε_i
 | Market_HSI | L4 市场代理 | 被动指数 | −3.76% | 22.25% | −0.26 | −49.3% | −7.85% |
 
 > `GMV_con` 的 1% 下限对 **9988、1810、0700** 是 binding；`GMV_uncon` 是纯课程公式。两者的差异主要来自下限/约束，详见 §1.2 和 `WEEK1_REPORT_EN.md` §3.4。
+>
+> 主表是 **long-only（Week 1 口径）**；Week 2 起的 short-enabled 版本见 §2.1。
 
 **诊断（不要放进主表，放 appendix）**：
 
@@ -230,6 +232,28 @@ R_i − r_f = α_i + β_i (R_M − r_f) + ε_i
 4. **Tangency**（课程公式）在允许做空时收益更高，但波动/回撤大；原始版本不可实施。
 5. **EW** 是最差的长期方法（Sharpe 0.20，最大回撤 −33%），说明“分散化”不等于“等权”。
 6. **HSI** 在样本期是负收益，所有组合都跑赢它，但要说明这是熊市基准，不能过度解读。
+
+### 2.1 做空后的 proposed method（Week 2 起）
+
+从 Week 2 起，proposed method 使用官方允许的做空（floor −15% / cap 30%）。同一 2021–2026 协议下：
+
+| 策略 | 年化 | 波动 | Sharpe | 最大回撤 | 主动 vs EW | 平均 gross |
+|---|---:|---:|---:|---:|---:|---:|
+| Signal_long（Week 1 口径） | 8.83% | 8.40% | 0.81 | −11.6% | +2.89% | 1.00 |
+| **Signal_short（Week 3 起）** | 7.86% | 7.99% | 0.73 | **−10.3%** | +1.96% | 1.24 |
+| GMV_long（Week 1） | 8.53% | 8.40% | 0.78 | −11.3% | +2.62% | 1.00 |
+| GMV_short | 7.10% | 7.90% | 0.65 | −11.0% | +1.25% | 1.15 |
+| CAPM_long | 8.15% | 8.49% | 0.72 | −12.5% | +2.27% | 1.00 |
+| **CAPM_short（Week 2 起）** | 7.24% | 8.15% | 0.64 | −12.5% | +1.40% | 1.08 |
+| EW | 4.72% | 16.26% | 0.17 | −33.0% | 0 | 1.00 |
+
+**读法**：
+
+- 做空**降低 Sharpe**（Signal 0.81→0.73，CAPM 0.72→0.64，GMV 0.78→0.65），因为被做空的高波动科技股在 2024–26 反弹；
+- 做空**降低波动/回撤**（Signal 最大回撤 −11.6%→−10.3%）；
+- 我们仍然从 Week 2 使用做空，是因为项目明确允许、且它能表达负向观点；但 short book 保持很小（单只 ≤ −15%），报告里要如实写“shorting did not improve backtest Sharpe”。
+
+> 最终报告的 benchmark comparison 要同时放 long-only（Week 1）和 short-enabled（Week 2+）两套行，避免把“Week 1 的 long-only”与“Week 2+ 的 short”混为一谈。
 
 ---
 
@@ -301,7 +325,7 @@ R_i − r_f = α_i + β_i (R_M − r_f) + ε_i
 A：主表有 Sharpe（用课程定义 `(μ−r_f)/σ`），并且有最大回撤、4 周分布。Signal_con 的 Sharpe 0.80 > EW 0.20，风险调整后也赢。
 
 **Q2：为什么 GMV_uncon 和 GMV_con 不一样？**
-A：课程公式允许做空，`GMV_uncon` 平均有 3.5 个空头、gross 1.16；我们组不做空，所以提交版是 `GMV_con`（纯多头 1%–25%）。两者收益/波动很接近，说明约束的代价不大。
+A：课程公式允许做空，`GMV_uncon` 平均有 3.5 个空头、gross 1.16；Week 1 我们 long-only，所以提交版是 `GMV_con`（纯多头 1%–25%）。Week 2 起使用 short-enabled（floor −15% / cap 30%，见 §2.1）；两者收益/波动很接近，说明约束的代价不大。
 
 **Q3：为什么 Tangency_uncon 的波动 363%？**
 A：这是课程公式 `Σ⁻¹(μ−r_f)` 在样本均值 + 近奇异协方差下的典型爆炸。它不是我们编的，而是 Markowitz 估计误差的经典表现。我们用 gross≤2 和 long-only 两个版本让它可实施，并把原始版本放在 appendix 作为“为什么需要收缩/约束”的证据。
@@ -338,6 +362,7 @@ cd D:\Backup\Documents\dase7310\DASE7310_GP2_Repo
 | `research/frontier_20261030.csv` | 有效前沿的 15 个点 |
 | `research/frontier_points.csv` | 各方法在前沿上的位置与效率缺口 |
 | `research/two_fund_check.csv` | 两基金定理检查 |
+| `research/short_backtest_weekly.csv` | long-only vs short-enabled 的逐周回测（§2.1 表） |
 | `research/benchmark_diagnostics.csv` | 原始切点组合的诊断（appendix 用） |
 
 ---

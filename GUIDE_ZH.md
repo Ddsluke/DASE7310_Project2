@@ -42,7 +42,7 @@
 |---|---|
 | 股票池 | 9988、0066、1398、3988、0981、0005、1810、0016、1113、0700 |
 | 初始资本 | HKD 1,000,000，必须满仓（`Σw = 1`） |
-| 做空 | **官方明确允许**（p.1：“short positions are permitted”）；我们组不做空（第一周决定） |
+| 做空 | **官方明确允许**（p.1：“short positions are permitted”）；**Week 1 不做空；Week 2 起使用，单只空头 ≤ −15%** |
 | 周内策略 | Buy-and-hold，周内股数不变 |
 | 再平衡 | 每个新交易周开始前可调，**全程最多 3 次**（第 2/3/4 周各一次） |
 | 交易周 | 11/2–6、11/9–13、11/16–20、11/23–27 |
@@ -197,7 +197,7 @@ cd D:\Backup\Documents\dase7310\DASE7310_GP2_Repo
 - [ ] `submission.xlsx` 的 Summary：`Initial / remaining capital` = 上周实际剩余资本；
 - [ ] 10 行，`Sum of weights = 1`；
 - [ ] `Number of Shares × Price ≈ Capital Allocated`；
-- [ ] 没有负权重（我们不做空）；
+- [ ] Week 1：没有负权重；Week 2 起允许空头 ≥ −15%；
 - [ ] Moodle 上传成功。
 
 ### 目标周结束后（下周五/周六）

@@ -33,7 +33,7 @@ The official `Group-Project-2_2026.pdf` (26 October 2026) specifies:
 |---|---|
 | Stock pool | 9988, 0066, 1398, 3988, 0981, 0005, 1810, 0016, 1113, 0700 |
 | Initial capital | HKD 1,000,000, fully allocated (`sum_s w_s = 1`) |
-| Short selling | **Explicitly permitted** (“short positions are permitted”, p.1); **not used by this group** |
+| Short selling | **Explicitly permitted** (“short positions are permitted”, p.1); **Week 1: not used; from Week 2: used with a −15% per-name cap** |
 | Holding period | Buy-and-hold within each trading week |
 | Rebalancing | Before a new week, at most **three adjustments** in total |
 | Trading weeks | 2–6 Nov, 9–13 Nov, 16–20 Nov, 23–27 Nov 2026 |
@@ -318,6 +318,11 @@ formula and are shown separately.
 > formula. The floor is binding for 9988, 1810 and 0700 and is the main reason the two
 > GMV rows differ.
 
+> This Week 1 report compares **long-only** portfolios. From Week 2 the group uses the
+> short-selling permission; the final report will add `GMV_short`, `CAPM_short` and
+> `Signal_short` rows (see `BENCHMARKS_ZH.md` §2.1). In the 2021–2026 backtest, shorting
+> lowers Sharpe but also lowers drawdown.
+
 The proposed signal portfolio has the highest Sharpe ratio in the group and a maximum
 drawdown close to GMV, while equal weight has the worst risk-adjusted performance. The
 CAPM portfolio adds only a small tilt and does not improve on GMV in this sample; this
@@ -461,20 +466,27 @@ time.
 
 | Week | Method | Purpose |
 |---|---|---|
-| 2 | **CAPM equilibrium view**: `μ_s = r_f + β_s × premium`, conservative λ ≈ 15 | Move one step up the efficient frontier from GMV; introduce a market view |
-| 3 | **Signal view**: 12-week momentum + proximity to the 52-week high + low volatility | Introduce a relative stock view; more stable than sample means |
-| 4 | **Adaptive confidence**: pre-registered rule based on cumulative active return vs EW | Adjust the strength of the view, not the model |
+| 2 | **CAPM equilibrium view + short**: `μ_s = r_f + β_s × premium`, λ ≈ 15, floor −15% / cap +30% | Move one step up the efficient frontier from GMV; introduce a market view and the first small short book |
+| 3 | **Signal view + short**: 12-week momentum + proximity to the 52-week high + low volatility, λ = 8, floor −15% / cap +30% | Introduce a relative stock view; express negative views on the weakest names |
+| 4 | **Adaptive confidence + short**: pre-registered rule based on cumulative active return vs EW | Adjust the strength of the view and the short cap, not the model |
 
-The CAPM view is deliberately conservative: on the 30 October data, λ = 15 moves 1398
-from 21.2% to 19.6%, 0005 from 13.6% to 10.8%, 1113 from 4.1% to 6.5%, and 0700 from
-1.0% to 2.1%. The signal view is stronger: it moves 1398 to 25%, keeps 0066 and 3988 at
-25%, raises 1113 to about 7.7%, and pushes 0981/0700 to the 1% floor.
+Week 1 remains the original **long-only** GMV; the short-selling permission is used from
+Week 2. On the 30 October data, the short-enabled CAPM at λ = 15 moves 0066 to 30.0%,
+3988 to 27.8%, 1398 to 16.0%, 0005 to 9.6%, and opens small shorts in 9988 (−2.6%) and
+1810 (−0.8%); gross is 1.07. The short-enabled signal at λ = 8 moves 0066/3988 to
+30.0%, 1398 to 25.0%, 1113 to 8.9%, and shorts 9988 (−4.4%), 1810 (−2.4%) and 0700
+(−0.6%); gross is 1.15.
 
 The progression is:
 
 ```
-GMV (no view) -> CAPM (market view) -> Signal (relative stock view) -> Adaptive (confidence update)
+GMV (no view, long-only) -> CAPM (market view, + small shorts) -> Signal (relative stock view, + shorts) -> Adaptive (confidence update)
 ```
+
+Shorting is **not** a free lunch in the backtest: the short-enabled versions have lower
+Sharpe than the long-only versions (signal 0.73 vs 0.81; CAPM 0.64 vs 0.72; GMV 0.65 vs
+0.78) but lower maximum drawdowns. We use it because the project explicitly permits it
+and it allows negative views; the short book is capped at −15% per name.
 
 This gives the final report a coherent methodological narrative rather than a sequence
 of unrelated models.

@@ -25,7 +25,7 @@ submitted week; add a new file / variant instead.
 |---|---|
 | Stock pool | 9988, 0066, 1398, 3988, 0981, 0005, 1810, 0016, 1113, 0700 |
 | Initial capital | HKD 1,000,000, fully allocated (`sum_s w_s = 1`) |
-| Short selling | **Explicitly permitted** (“short positions are permitted”, p.1); **not used by this group** |
+| Short selling | **Explicitly permitted** (“short positions are permitted”, p.1); **Week 1 long-only; used from Week 2 with a −15% per-name cap** |
 | Holding period | Buy-and-hold within each trading week |
 | Rebalancing | Before each new week, max **3 adjustments** total (weeks 2, 3, 4) |
 | Trading weeks | Nov 2–6, Nov 9–13, Nov 16–20, Nov 23–27 |
@@ -178,28 +178,34 @@ start from the simplest result in the course and add one layer per week.
   It beat EW in the weak 2021–23 period (+3.7% vs +1.2%) but lagged in the 2024–26
   rally (+17.0% vs +18.1%).
 
-### Week 2 — CAPM equilibrium view (Lecture 4)
+### Week 2 — CAPM equilibrium view + short (Lecture 4)
 - Lecture 4: `mu_s = r_f + beta_s * market_premium`; beta estimated by regression on HSI.
 - This is a **market view** (high-beta stocks should earn more), not a stock-picking view.
-- Use a conservative risk aversion (`lambda` large) or a 9–10% vol target, so the
-  portfolio moves only slightly up the frontier from GMV.
+- Use `lambda = 15`, a **−15% per-name short cap** and a **+30% long cap**. Expected
+  volatility ≈ 8.2% (sample covariance), gross ≈ 1.07.
+- This is the first week with short positions; the short book is small (9988 −2.6%,
+  1810 −0.8% in the 30 October preview).
 - Note: shrinking all means toward the grand mean is just adding a constant; because
   `1'w = 1`, it does **not** change the optimal weights. Meaningful shrinkage must be
   toward zero, toward CAPM, or via Black–Litterman.
-- Compare GMV, CAPM and EW on the first realised week before adopting.
+- Short-enabled backtest: CAPM Sharpe 0.64 vs 0.72 long-only; the short book is for
+  relative views/risk control, not return enhancement.
 
-### Week 3 — Signal-based relative view
+### Week 3 — Signal-based relative view + short
 - Replace the equilibrium mean with a robust composite signal: 12-week momentum +
   distance from the 52-week high + low volatility (equal-weight z-scores).
-- This is a **relative stock view**: overweight the high-score names, underweight the
-  low-score names. Still long-only, same floor/cap, 10–12% vol target.
+- This is a **relative stock view**: overweight the high-score names, short the
+  low-score names (9988 −4.4%, 1810 −2.4%, 0700 −0.6% in the 30 October preview).
+- `lambda = 8`, floor −15%, cap +30%; expected vol ≈ 8.2%, gross ≈ 1.15.
 - The composite has a positive rank IC in every year of the sample (near-high IC 0.09,
   t ≈ 3.3), unlike raw sample means. The sample-mean view would put 25% in SMIC (0981)
-  because of its 41% historical mean; the signal view keeps it at 1%.
+  because of its 41% historical mean; the signal view keeps it at 1.4%.
+- Short-enabled backtest: signal Sharpe 0.73 vs 0.81 long-only, but max drawdown
+  −10.3% vs −11.6%. Shorting lowers both return and drawdown.
 
-### Week 4 — Adaptive view confidence
+### Week 4 — Adaptive view confidence + short
 - Pre-registered: if cumulative active return vs EW is below −5pp at a rebalance,
-  cut the view strength (raise `lambda` / lower the vol target) back toward GMV;
+  raise `lambda` to 20 and tighten the short cap from −15% to −10% (shrink toward GMV);
   if above +5pp, keep the view but do not add leverage.
 - Record the decision and its reason in `params.json`.
 

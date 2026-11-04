@@ -1,9 +1,9 @@
-# Week 2 行动指南：从 GMV 到 CAPM 市场观点
+# Week 2 行动指南：CAPM 市场观点 + 做空
 
 > **截止**：2026-11-08（周日）23:59
 > **估值截点**：2026-11-06（周五）收盘
 > **交易周**：2026-11-09 → 2026-11-13
-> **本周目标**：从“无观点”的 GMV，沿有效前沿往上走一小步，加入 CAPM 市场观点；仍然纯多头、10 只全持有、满仓。
+> **本周目标**：从 Week 1 的 long-only GMV，沿有效前沿往上走一小步，加入 CAPM 市场观点；**从本周起使用官方允许的做空**（short cap −15%）。
 >
 > **报告关联**：本周的 CAPM 组合是最终报告 benchmark comparison 的一部分（Lecture 4 的 CAPM/SML 基准）。完整的六类课程 benchmark 对照见 `BENCHMARKS_ZH.md`。
 
@@ -14,13 +14,15 @@
 | 时间 | 动作 |
 |---|---|
 | 11/6（周五）收盘后 | `refresh-data --end 2026-11-06`；`evaluate --week 1` 记录第一周实际收益 |
-| 11/7（周六） | `build --week 2 --strategy capm --lam 15`；生成并核对提交表 |
+| 11/7（周六） | `build --week 2 --strategy capm --lam 15 --floor -0.15 --cap 0.30`；生成并核对提交表 |
 | 11/8（周日）23:59 | 上传 `weeks/week2/submission.xlsx` 到 Moodle |
 | 11/13（下周五）收盘后 | `evaluate --week 2`，记录第二周实际收益 |
 
+> **不要用 11/2–11/4 的涨跌回填 Week 1**；Week 2 的最终权重必须用 **11/6 截点**的数据重算。11/2–11/4 只能用于事前研究/预案，不能替代 11/6 的 build。
+
 ---
 
-## 2. 本周方法：CAPM 观点
+## 2. 本周方法：CAPM 观点 + 小空头
 
 ### 2.1 公式
 
@@ -35,20 +37,35 @@
 - `μ_market − r_f`：市场风险溢价，取 **5%/年**；
 - 因为组合约束是 `Σw = 1`，给所有 μ 加同一个常数不改变权重，**真正起作用的是 β 的横截面差异**。
 
-### 2.2 优化问题
+### 2.2 优化问题（含做空）
 
 ```
 max_w   μ'w − (λ/2) w'Σw
 s.t.    Σ_s w_s = 1
-        0.01 ≤ w_s ≤ 0.25
+        −0.15 ≤ w_s ≤ 0.30
 ```
 
 - Σ：104 周协方差，30% 收缩（和 Week 1 相同）；
 - λ = **15**：保守设置，让组合只从 GMV 往上走一小步；
-- 纯多头，不做空；
-- 单票 1%–25%，10 只都持有。
+- **允许做空**：单只最低 −15%，最高 +30%；
+- 10 只股票都出现在表里；负权重表示空头（负资本、负股数）；
+- 预期 gross ≈ 1.05–1.15，不是高杠杆。
 
-### 2.3 为什么用 CAPM，而不是样本均值
+### 2.3 为什么从 Week 2 开始做空
+
+官方 PDF 第 1 页明确写：
+
+> “This entire amount must be fully allocated across the 10 selected stocks; **short positions are permitted**.”
+
+我们组的做法：
+
+- Week 1 已经按 long-only GMV 提交，**不改权重**；
+- Week 2 起使用做空许可，但只开**小空头**（单只 ≤15%）；
+- 空头主要用于表达“相对弱”的股票（如 9988/1810），不是加杠杆。
+
+> **诚实提示**：2021–2026 回测里，short-enabled 版本的 Sharpe 低于 long-only 版本（Signal 0.73 vs 0.81；CAPM 0.64 vs 0.72；GMV 0.65 vs 0.78），因为被做空的高波动科技股在 2024–26 反弹。我们仍然使用做空，是因为项目明确允许、且它能表达负向观点；但 short book 保持很小（≤15%），并在报告里如实写“shorting did not improve the backtest Sharpe”。
+
+### 2.4 为什么用 CAPM，而不是样本均值
 
 | 做法 | 问题 |
 |---|---|
@@ -60,13 +77,13 @@ Week 2 用 CAPM 的目的不是“跑赢”，而是**在报告里展示从“�
 
 > GMV（只用 Σ）→ CAPM（加入市场观点 μ）→ Signal（加入相对选股观点）→ Adaptive（调整观点置信度）。
 
-### 2.4 为什么 λ = 15
+### 2.5 为什么 λ = 15
 
 - λ 越大越保守，越接近 GMV；
-- λ = 15 时，组合的预期年化波动大约 **8.9%**（样本协方差口径），和 Week 1 的 GMV（8.8%）几乎一样；
+- λ = 15 + short cap −15% 时，组合的预期年化波动约 **8.2%**（样本协方差口径），和 Week 1 的 GMV（8.8%）接近；
 - 这样既表达了“高 β 应该多配”的观点，又不会把组合变成高 β 科技赌注。
 
-如果 `build` 出来的组合年化波动 > 10%，把 λ 提高到 20；如果 < 8.5%，把 λ 降到 10。
+如果 `build` 出来的组合年化波动 > 10.5%，把 λ 提高到 20；如果 gross > 1.3，检查是否空头过大。
 
 ---
 
@@ -83,74 +100,61 @@ cd D:\Backup\Documents\dase7310\DASE7310_GP2_Repo
 # 2) 记录 Week 1 实际收益（会写 ledger.md）
 & $py portfolio.py evaluate --week 1
 
-# 3) 生成 Week 2 组合（CAPM，λ=15）
-& $py portfolio.py build --week 2 --cutoff 2026-11-06 --strategy capm --lam 15
+# 3) 生成 Week 2 组合（CAPM + short，λ=15，floor=-15%，cap=30%）
+& $py portfolio.py build --week 2 --cutoff 2026-11-06 --strategy capm --lam 15 --floor -0.15 --cap 0.30
 
-# 4) 生成一个 GMV 参考组合（不提交，只用于对比）
-& $py portfolio.py build --week 2 --cutoff 2026-11-06 --strategy gmv --variant ref_gmv
+# 4) 参考组合（不提交，只用于对比）
+& $py portfolio.py build --week 2 --cutoff 2026-11-06 --strategy gmv --floor -0.15 --cap 0.30 --variant ref_gmv_short
 
 # 5) 提交前核对
 Get-Content weeks\week2\params.json
 ```
-
-**如果决定使用做空（官方允许）**：
-
-```powershell
-# short-enabled GMV（-15% 下限 / 30% 上限）
-& $py portfolio.py build --week 2 --cutoff 2026-11-06 --strategy gmv --floor -0.15 --cap 0.30
-
-# short-enabled CAPM / Signal
-& $py portfolio.py build --week 2 --cutoff 2026-11-06 --strategy capm --lam 15 --floor -0.15 --cap 0.40
-& $py portfolio.py build --week 2 --cutoff 2026-11-06 --strategy signal --lam 8 --floor -0.15 --cap 0.40
-```
-
-> **注意**：Week 1 已提交的 long-only 不要用 11/2–11/4 的实际涨跌回填；做空从 Week 2 开始最干净。
 
 提交文件：
 
 - **Moodle**：`weeks\week2\submission.xlsx`
 - 同内容 CSV：`weeks\week2\submission.csv`
 - 参数/β/权重：`weeks\week2\params.json`
-- GMV 参考：`weeks\week2\portfolio_ref_gmv.csv`
+- GMV short 参考：`weeks\week2\portfolio_ref_gmv_short.csv`
 
 ---
 
 ## 4. 预期权重（用 10/30 数据的预览，不是最终值）
 
-下面是**假设截点仍是 10/30** 时 CAPM λ=15 的权重，用于你理解方向；11/6 实际数据出来后，权重会变，以 `submission.xlsx` 为准。
+下面是**假设截点仍是 10/30** 时 CAPM λ=15、floor=−15%、cap=30% 的权重，用于理解方向；11/6 实际数据出来后，权重会变，以 `submission.xlsx` 为准。
 
 | 代码 | 名称 | 预览权重 |
 |---|---|---:|
-| 0066 | 港铁 | 25.0% |
-| 3988 | 中行 | 25.0% |
-| 1398 | 工行 | 19.6% |
-| 0005 | 汇丰 | 10.8% |
-| 0016 | 新鸿基 | 6.6% |
-| 1113 | 长实 | 6.5% |
-| 0981 | 中芯 | 2.4% |
-| 0700 | 腾讯 | 2.1% |
-| 9988 | 阿里 | 1.0% |
-| 1810 | 小米 | 1.0% |
+| 0066 | 港铁 | +30.0% |
+| 3988 | 中行 | +27.8% |
+| 1398 | 工行 | +16.0% |
+| 0005 | 汇丰 | +9.6% |
+| 1113 | 长实 | +6.0% |
+| 0016 | 新鸿基 | +5.7% |
+| 0700 | 腾讯 | +5.3% |
+| 0981 | 中芯 | +3.1% |
+| 1810 | 小米 | **−0.8%** |
+| 9988 | 阿里 | **−2.6%** |
+| **合计** | | **100%**（gross 1.07，2 个空头） |
 
-和 Week 1 GMV 相比：
+和 Week 1 long-only GMV 相比：
 
-- 1398 从 21.2% 降到 19.6%；
-- 0005 从 13.6% 降到 10.8%；
-- 1113 从 4.1% 升到 6.5%；
-- 0700 从 1.0% 升到 2.1%，0981 从 1.7% 升到 2.4%（高 β 略微加仓）。
-
-变化很小，这是故意的：**Week 2 是“弱观点”，不是“全押科技”**。
+- 0066 从 25% 升到 30%，3988 从 25% 升到 27.8%；
+- 1398 从 21.2% 降到 16.0%，0005 从 13.6% 降到 9.6%；
+- 9988、1810 从 1% 变成小空头（−2.6%、−0.8%）；
+- 组合仍然是“银行/港铁为主”，只是多了两个小空头。
 
 ---
 
 ## 5. 提交前检查（30 秒）
 
 - [ ] `params.json` 的 `cutoff` = **2026-11-06**；
-- [ ] `strategy` = `capm`，`lam` = 15，`beta` 已写入；
-- [ ] `capital_prev` = Week 1 实际剩余资本（不是固定的 1,000,000）；
+- [ ] `strategy` = `capm`，`lam` = 15，`floor` = −0.15，`cap` = 0.30，`beta` 已写入；
+- [ ] `capital_prev` = Week 1 实际剩余资本（不是固定的 1,000,000；Week 1 实际约 998,704.94 到 11/4，最终以 11/6 估值为准）；
 - [ ] `submission.xlsx` 的 Summary：`Sum of weights = 1`；
-- [ ] 10 行，全部权重 ≥ 1%，无负权重；
-- [ ] `Number of Shares × Price ≈ Capital Allocated`；
+- [ ] 10 行，空头 ≥ −15%，多头 ≤ 30%；
+- [ ] `n_short` 与表里的负权重数量一致；
+- [ ] `Number of Shares × Price ≈ Capital Allocated`（空头为负资本/负股数）；
 - [ ] Moodle 上传成功（截图/确认）。
 
 ---
@@ -160,11 +164,12 @@ Get-Content weeks\week2\params.json
 | 情况 | 处理 |
 |---|---|
 | `refresh-data` 失败 | 检查 `data/meta.json` 的 `raw_last_weekly` 是否 = 2026-11-06；不要用 10/30 的旧数据提交 |
-| `build` 报 “capm strategy requires HSI” | 检查 `data/index_returns.csv` 是否存在；没有就先用 `--strategy gmv`，并在 `params.json` 记下原因 |
-| CAPM 组合年化波动 > 11% | 把 `--lam` 提到 20 |
-| CAPM 组合和 GMV 几乎一样（最大差 < 1pp） | 正常，说明观点很弱；保留 CAPM，报告里写“week 2 只做了小幅倾斜” |
-| Week 1 GMV 主动收益 < −5pp | 不要因为一周噪声就推翻框架；仍用 CAPM λ=15，但在 `params.json` 记下 “one-week noise, no rule trigger” |
-| 组里不想用 CAPM | 退回 `--strategy gmv`，把 Week 2 当作“重复基准”；但报告里要说明为什么没有加观点 |
+| `build` 报 “capm strategy requires HSI” | 检查 `data/index_returns.csv` 是否存在；没有就先用 `--strategy gmv --floor -0.15 --cap 0.30`，并在 `params.json` 记下原因 |
+| 组合年化波动 > 10.5% | 把 `--lam` 提到 20 |
+| gross > 1.30 | 把 `--floor` 从 −0.15 收到 −0.10，或把 λ 提到 20 |
+| 空头数量 > 3 只 | 正常；但检查是否超过单只 −15% 下限 |
+| Week 1 主动收益 < −5pp | 不要因为一周噪声就推翻框架；仍用 CAPM λ=15，但在 `params.json` 记下 “one-week noise, no rule trigger” |
+| 组里不想用做空 | 退回 `--floor 0.01 --cap 0.25`（long-only CAPM）；报告里说明为什么放弃 short |
 
 ---
 
@@ -172,31 +177,34 @@ Get-Content weeks\week2\params.json
 
 提交后，在 `weeks/week2/` 里保留：
 
-- `params.json`：β、λ、r_f、premium、权重、C_{i-1}；
+- `params.json`：β、λ、r_f、premium、floor、cap、权重、C_{i-1}；
 - `submission.xlsx` / `.csv`：提交值；
 - `report.md`：自动生成的快照说明；
-- `portfolio_ref_gmv.csv`：GMV 参考权重，用于对比；
+- `portfolio_ref_gmv_short.csv`：short GMV 参考权重；
 - 11/13 后：`realized.csv`、`realized_summary.json`。
 
 报告里可以写：
 
-> “Week 2 introduced the CAPM equilibrium view. The portfolio moved only slightly from GMV: 1398 21.2% → 19.6%, 0005 13.6% → 10.8%, 1113 4.1% → 6.5%, 0700 1.0% → 2.1%. This is intentional: with λ = 15, the view is expressed but the risk model still dominates. The realised return and the active return vs EW are recorded in `ledger.md`.”
+> “Week 2 introduced the CAPM equilibrium view and, for the first time, used the project's explicit short-selling permission. The portfolio remains dominated by the low-volatility bank/transport core, with small shorts in 9988 (−2.6%) and 1810 (−0.8%). The short book is capped at −15% per name; gross exposure is 1.07. In the 2021–2026 backtest, the short-enabled CAPM portfolio had a lower Sharpe than the long-only version (0.64 vs 0.72), so we keep the short book small and treat it as a relative-view tool rather than a return enhancer.”
 
 ---
 
 ## 8. 常见问题
 
-**Q：为什么不用样本均值？**
-A：0981 的 104 周平均年化收益约 41%，样本均值优化会给它 25%，但它最近 4 周跌了 32%、波动 56.6%。这是估计误差，不是观点。CAPM 只用 β，参数少得多。
+**Q：为什么 Week 2 开始做空？**
+A：官方 PDF 第 1 页明确写 “short positions are permitted”。Week 1 已经按 long-only 提交，不改；Week 2 起使用小空头表达相对弱的股票。
+
+**Q：做空会不会被 margin/借券成本吃掉？**
+A：项目公式没有计交易成本/借券成本，`R_i` 只按价格变动算。报告里要注明 “gross of borrow/margin costs”；实际中空头有借券费和保证金要求，所以 short cap 保持 −15%。
+
+**Q：backtest 说 short 降低 Sharpe，为什么还做？**
+A：因为项目允许，而且它能表达负向观点；但我们把空头限制在 −15%，并如实报告 lower Sharpe。如果组里更看重回测 Sharpe，可以退回 long-only CAPM，把做空留到 Week 3/4。
 
 **Q：λ=15 是什么单位？**
 A：没有单位，是风险厌恶系数。它只在 `μ'w − (λ/2)w'Σw` 里和 μ、Σ 的相对大小有关。换 μ 的尺度（比如把 premium 从 5% 改成 3%）等价于换 λ，所以报告里要固定写清楚 r_f、premium、λ。
 
 **Q：CAPM 组合还是重仓银行，这不是没观点吗？**
-A：观点是“高 β 多配”，但风险模型和 25% 上限会把它拉回来。Week 2 是弱观点，Week 3 的信号观点会更强。报告里可以把“观点强度”作为一条主线。
-
-**Q：premium 取 5% 有依据吗？**
-A：可以用长期港股风险溢价假设，也可以做敏感性（3%/5%/7%）。因为 `Σw=1`，premium 的绝对水平不改变权重，只改变报告里的预期收益数字；真正影响权重的是 β 的横截面差异。
+A：观点是“高 β 多配”，但风险模型和 30% 上限会把它拉回来。Week 2 是弱观点，Week 3 的信号观点会更强。报告里可以把“观点强度”作为一条主线。
 
 **Q：如果 Week 2 跑输等权怎么办？**
 A：一周结果不能说明 CAPM 无效。按预注册规则，只有累计主动收益 < −5pp 才调整；而且 Week 3 会换一个不同的观点（信号），报告里正好可以对比“市场观点 vs 选股观点”。

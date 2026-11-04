@@ -2,6 +2,8 @@
 
 > 配套脚本：`research_views.py`；输出：`research/views_frontier.csv`。
 > 前置阅读：`GMV_EXPLAINED_ZH.md`（协方差矩阵与 GMV）。
+>
+> **时点说明**：本文公式以 long-only 为例；Week 2 起把约束改成 `−0.15 ≤ w_s ≤ 0.30` 即可允许做空，具体见 `WEEK2_GUIDANCE_ZH.md` / `WEEK3_GUIDANCE_ZH.md`。
 
 ---
 
@@ -231,7 +233,7 @@ w = w / sum(w)
 
 - `z` 是信号 z 分数；
 - `k` 是主动仓位倍数（不是杠杆，权重和仍为 1）；
-- 不做空时，负倾斜截断为 0。
+- Week 1 不做空时，负倾斜截断为 0；Week 2 起可设 `floor=-0.15`，保留小空头。
 
 这和“μ ∝ z 的均值-方差解”在方向上是等价的：都是“超配高分、低配低分”。区别是 tilt 不估 μ 的绝对大小，也不估 λ，直接把观点强度写进 `k`。对 4 周的项目来说，tilt 更透明、更不容易被均值噪声带偏。
 

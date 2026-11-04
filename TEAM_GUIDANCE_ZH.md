@@ -33,7 +33,7 @@
 |---|---|
 | 股票池 | 9988、0066、1398、3988、0981、0005、1810、0016、1113、0700 |
 | 初始资本 | HKD 1,000,000，必须满仓（`Σw = 1`） |
-| 做空 | **官方明确允许**（p.1：“short positions are permitted”）；我们组不做空 |
+| 做空 | **官方明确允许**（p.1：“short positions are permitted”）；**Week 1 已提交 long-only；Week 2 起使用，单只空头 ≤ −15%** |
 | 周内策略 | Buy-and-hold，周内股数不变 |
 | 再平衡 | 第 2/3/4 周开始前各一次，**全程最多 3 次** |
 | 交易周 | 11/2–6、11/9–13、11/16–20、11/23–27 |
@@ -75,7 +75,7 @@ Lecture 1 syllabus p.12 也说：“The total available capital at the end of we
 | 权重和必须 = 1 吗？ | **是（隐含）**。PDF 没有单独写 `Σw=1`，但 “fully allocated” + `w=c/C` + `C=Σph`（没有现金项）意味着全部资本投到 10 只股票，`Σc=C`，所以 `Σw=1`。 | p.1–2 |
 | 可以空仓（全部现金）吗？ | **不可以**。“entire amount must be fully allocated across the 10 selected stocks”；`C_i` 只对股票市值求和，没有现金项。 | p.1–2 |
 | 可以某只股票权重为 0 吗？ | **没有明确禁止**。PDF 只说 “across the 10 selected stocks”，没有写每只必须 >0。数学上 `c_s=0` 是允许的；但字面“across the 10”可以理解为 10 只都应持有。我们组用 **1% 下限** 来避免歧义。 | p.1 |
-| 可以做空吗？ | **可以，官方明确允许**。原文（p.1）：“This entire amount must be fully allocated across the 10 selected stocks; short positions are permitted.” 做空时 `c_s` 和 `h_s` 为负，`Σw=1` 仍成立（净权重），但 gross exposure 可以 >1。我们组选择不做空。 | p.1 |
+| 可以做空吗？ | **可以，官方明确允许**。原文（p.1）：“This entire amount must be fully allocated across the 10 selected stocks; short positions are permitted.” 做空时 `c_s` 和 `h_s` 为负，`Σw=1` 仍成立（净权重），但 gross exposure 可以 >1。**Week 1 不做空；Week 2 起使用，单只空头 ≤ −15%。** | p.1 |
 | 可以持有现金等再平衡吗？ | **不可以**。剩余资本 `C_i` 是股票市值之和；卖出后的钱要重新分配到股票，不留在现金。 | p.2 |
 | 可以只买 9 只吗？ | **字面上没有禁止，但“across the 10 selected stocks”建议 10 只都持有**。如果只买 9 只，风险是老师认为没有 fully allocate across the 10；1% 下限是最保守的做法。 | p.1 |
 
@@ -85,10 +85,10 @@ Lecture 1 syllabus p.12 也说：“The total available capital at the end of we
 
 - 满仓、`Σw=1`、无现金，是官方口径；
 - 零权重（单只）没有被明确禁止，但有歧义；我们的 1% 下限是保守解释，报告里要写明这是我们的 implementation constraint；
-- 做空官方允许，我们组不做；
+- 做空官方明确允许（p.1）；**Week 1 已提交 long-only；Week 2 起使用，单只空头上限 −15%**；
 - 现金/空仓（整个组合）不允许。
 
-> **如果决定使用做空**：代码已支持 `--floor` / `--cap`，例如 `build --week 2 ... --strategy gmv --floor -0.15 --cap 0.30`。Week 1 已提交的 long-only **不要用 11/2–11/4 的涨跌回填**；做空从 Week 2（11/6 截点）开始最干净。候选文件：`weeks/week1/submission_short_gmv_onesheet.xlsx`。
+> **已决定（2026-11-04）**：Week 1 保持 long-only，只修表格格式；Week 2 起使用 `--floor -0.15 --cap 0.30`。Week 1 的权重**不要**用 11/2–11/4 的涨跌回填；Week 2 最终用 **11/6 截点**重算。
 
 ---
 
@@ -160,12 +160,12 @@ Python 3.12、pandas 3.0、numpy 2.5、scipy 1.18、akshare 1.19、openpyxl。
 
 | `--strategy` | 含义 | 关键参数 |
 |---|---|---|
-| `gmv` | 全局最小方差（纯多头 1–25%） | 无 |
-| `capm` | CAPM/SML 观点 + 均值-方差 | `--lam`（默认 10，建议 15）、`--rf`、`--premium` |
-| `signal` | 复合信号（12 周动量 + 近 52 周高 + 低波动）+ 均值-方差 | `--lam`（建议 8） |
-| `tilt` | 直接对 EW 做信号倾斜（不估 μ） | `--k`（建议 2） |
+| `gmv` | 全局最小方差（`--floor -0.15 --cap 0.30` 可做空） | `--floor`、`--cap` |
+| `capm` | CAPM/SML 观点 + 均值-方差 | `--lam`（建议 15）、`--floor -0.15`、`--cap 0.30`、`--rf`、`--premium` |
+| `signal` | 复合信号（12 周动量 + 近 52 周高 + 低波动）+ 均值-方差 | `--lam`（建议 8）、`--floor -0.15`、`--cap 0.30` |
+| `tilt` | 直接对 EW 做信号倾斜（不估 μ） | `--k`（建议 2）、`--floor -0.20`、`--cap 0.35` |
 | `ew` | 等权 1/10 | 无 |
-| `tangency` | 切点组合（课程公式 + 约束） | `--rf` |
+| `tangency` | 切点组合（课程公式 + 约束） | `--rf`、`--cap` |
 | `top4` | 前 4 名集中（robustness） | 无 |
 
 ### 3.4 目录
@@ -239,7 +239,7 @@ Get-Content data\meta.json
 - [ ] `strategy` / `lam` / `k` 与预期一致；
 - [ ] `capital_prev` = 上周实际剩余资本（第 2 周起不是 1,000,000）；
 - [ ] `submission.xlsx` 的 Summary：`Sum of weights = 1`；
-- [ ] 10 行，全部权重 ≥ 1%（我们不做空，没有负权重）；
+- [ ] 10 行，`Σw=1`；空头 ≥ −15%，多头 ≤ 30%；`n_short` 与表里的负权重数量一致；
 - [ ] `Number of Shares × Price ≈ Capital Allocated`；
 - [ ] Moodle 上传成功（截图/确认）。
 
@@ -257,10 +257,12 @@ Get-Content data\meta.json
 
 | 周 | 方法 | 回答的问题 | 关键参数 |
 |---|---|---|---|
-| 1 | **GMV** | 不考虑收益，风险最低的组合是什么？ | 104 周 Σ、30% 收缩、1–25% |
-| 2 | **CAPM / SML** | 高 β 是否应该多配？ | β 用 HSI 回归、λ=15 |
-| 3 | **复合信号** | 哪些股票相对更强/更弱？ | 12 周动量 + 近高点 + 低波、λ=8 |
-| 4 | **自适应** | 前 3 周表现是否支持这个观点？ | 累计主动收益 < −5pp → 提高 λ |
+| 1 | **GMV（long-only）** | 不考虑收益，风险最低的组合是什么？ | 104 周 Σ、30% 收缩、1–25%，不做空 |
+| 2 | **CAPM / SML + short** | 高 β 是否应该多配？ | β 用 HSI 回归、λ=15、floor −15%、cap 30% |
+| 3 | **复合信号 + short** | 哪些股票相对更强/更弱？ | 12 周动量 + 近高点 + 低波、λ=8、floor −15%、cap 30% |
+| 4 | **自适应 + short** | 前 3 周表现是否支持这个观点？ | 累计主动收益 < −5pp → λ=20、floor −10% |
+
+> **做空时点**：Week 1 已经按 long-only 提交，不改；**Week 2 起**使用官方允许的做空，单只空头 ≤ −15%，gross 通常 1.05–1.20。
 
 报告里要讲清楚：**为什么从 GMV 开始**（GP1 证明周收益均值不可预测；GMV 只用 Σ），
 以及**每一步加了多少观点、风险如何变化**。
@@ -305,7 +307,7 @@ BENCHMARKS_ZH.md
 
 ### 6.2 三个必须讲清楚的点
 
-- **课程公式 vs 可实施版**：GMV 和 Tangency 的课程公式允许做空；我们组 long-only，所以同时报告 `_uncon` 和 `_con`。`GMV_con` 还加了 **1% 下限 / 25% 上限**；9988/1810/0700 三只触及 1% 下限，不设下限时它们是 0。报告里必须写清楚这是实现约束，不是理论 GMV。
+- **课程公式 vs 可实施版**：GMV 和 Tangency 的课程公式允许做空；**Week 1 我们 long-only**，所以报告 `GMV_uncon` 和 `GMV_con`；**Week 2 起改用 short-enabled**（`--floor -0.15 --cap 0.30`），报告要加 `GMV_short` / `CAPM_short` / `Signal_short` 三行。`GMV_con` 的 1% 下限对 9988/1810/0700 是 binding；这是实现约束，不是理论 GMV。
 - **原始切点组合为什么会爆炸**：样本均值 + 近奇异协方差 → `Σ⁻¹μ̃` 权重极端（平均 gross 34.75、worst week −652%）。这是估计误差的经典证据，也是我们从 GMV 开始的原因。
 - **两基金定理**：严格成立需要无约束；我们的检查是 long-only 近似。GMV_con/CAPM/Signal 的 L1 距离 0.05–0.17，EW 0.90，说明 proposed 接近两基金线，EW 远离。
 
@@ -324,7 +326,7 @@ BENCHMARKS_ZH.md
 | 5 | Evaluation（优缺点）、potential improvements、conclusion | 报告 owner |
 | 附录 | 每周权重、参数、复现命令（不计页数） | 数据 owner |
 
-> 第 2 页 methodology 和第 4 页 benchmark 都要写：`GMV_con` 使用 **1% 下限 / 25% 上限**；`GMV_uncon` 是纯课程公式；floor 对 9988/1810/0700 是 binding；代价是样本波动 +0.24pp、样本均值 −0.42pp。
+> 第 2 页 methodology 和第 4 页 benchmark 都要写：Week 1 `GMV_con` 使用 **1% floor / 25% cap**；Week 2 起 short-enabled（**floor −15% / cap 30%**）。报告要如实写 short-enabled 回测 Sharpe 低于 long-only（Signal 0.73 vs 0.81；CAPM 0.64 vs 0.72；GMV 0.65 vs 0.78），但最大回撤更低。
 
 ### 7.2 分工建议
 
@@ -406,6 +408,8 @@ BENCHMARKS_ZH.md
 8. **把 λ 当观点强度**：λ 越大越保守；观点强度也可以用目标波动表达，报告里固定一种说法。
 9. **HSI 当可提交组合**：HSI 不是 10 只股票的组合，只是市场 benchmark。
 10. **报告数字没有出处**：每个数字都要能指到 CSV/JSON。
+11. **用 11/2–11/4 回填 Week 1**：不可以；Week 1 权重不变，只修格式；Week 2 最终用 **11/6 截点**重算。
+12. **做空忘记负号**：空头的 `capital` 和 `shares` 都是负的；检查 `n_short` 和 gross，别把负号漏掉。
 
 ---
 
@@ -420,7 +424,7 @@ BENCHMARKS_ZH.md
 > 2. 每周流程：`refresh-data --end <cutoff>` → `evaluate --week <prev>` → `build --week <N> --cutoff <cutoff> --strategy <...>` → 核对 → 提交。
 > 3. 绝不用复权价算股数；股数公式 `h = c / p`，`p` 用 `data/weekly_closes_raw.csv`（或 `prices_asof` 返回的 raw 价）。
 > 4. 第二周起 `C_{i-1}` 必须来自上一周 `portfolio.csv` 的实际股数 × 新截点价；不要假设还是 1,000,000。
-> 5. 不做空；所有权重 ≥ 1%，和 = 1，10 只都持有。
+> 5. Week 1 已提交 long-only，不改；Week 2 起允许做空，使用 `--floor -0.15 --cap 0.30`；`Σw=1`，空头 ≥ −15%，多头 ≤ 30%，10 只都出现在表里。
 > 6. 不覆盖 `weeks/weekN/` 里已提交的文件；要改就新建 `_variant` 并在 `params.json` 写原因。
 > 7. 所有数字必须来自 `portfolio.py` / `research_*.py` 的输出 CSV/JSON；不要自己编。
 > 8. 报告 comparison 必须覆盖 `BENCHMARKS_ZH.md` 里的六类课程 benchmark（1/N、GMV、有效前沿、切点、两基金、CAPM/市场组合）。

@@ -1,8 +1,8 @@
 # Week 1 revision candidates — 2026-11-04
 
 **Context:** the instructor reopened the Week 1 submission because of a table-format
-issue. The group is also considering enabling short selling (explicitly permitted by the
-project brief, p.1: “short positions are permitted”).
+issue. The group has decided to enable short selling from **Week 2** (explicitly
+permitted by the project brief, p.1: “short positions are permitted”).
 
 **Hard rule:** every candidate below uses **data through 2026-10-30 only**. The realised
 returns of 2–4 November are **not** used to choose weights. Using them would be
@@ -48,10 +48,13 @@ Banks fell (1398 −0.95%, 3988 −3.34%) while technology rallied (9988 +3.66%,
 would have done **worse** this week. The only way to “fit” the week would be to go long
 technology / short banks — which is pure hindsight and is not a valid Week 1 decision.
 
-## Decision
+## Decision (2026-11-04)
 
-- **Path A (recommended):** keep the original long-only GMV; submit only the
-  format-corrected file. Enable shorting from Week 2 (cutoff 6 November).
-- **Path B (only if the instructor explicitly allows a weight revision):** submit the
-  short-enabled GMV above; keep the original file and this note for audit.
+- **Week 1:** keep the original long-only GMV weights; only the table format is fixed.
+  No weights were changed. `submission.xlsx` is the one-sheet format; the original
+  multi-sheet file is `submission_multisheet.xlsx`.
+- **Week 2 onward:** use the short-selling permission with floor −15% / cap 30%; the
+  first short-enabled portfolio is built at the **2026-11-06** cutoff.
+- The 2–4 November returns are post-hoc evaluation only; they are **not** used for any
+  Week 1 weight.
 - **Not allowed:** choose Week 1 weights using 2–4 November returns.

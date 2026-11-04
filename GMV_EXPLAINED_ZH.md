@@ -2,6 +2,8 @@
 
 > 对应代码：`portfolio.py` 的 `shrink_cov()` 和 `gmv_weights()`；
 > 复现脚本：`research_gmv.py`；数据：`data/weekly_returns_hfq.csv`。
+>
+> **时点说明**：本文以 Week 1 的 **long-only GMV** 为例；Week 2 起组里使用官方允许的做空（`--floor -0.15 --cap 0.30`），具体见 `WEEK2_GUIDANCE_ZH.md` / `WEEK3_GUIDANCE_ZH.md`。
 
 ---
 
@@ -207,7 +209,7 @@ Ledoit-Wolf（δ=5.9%）的 GMV 权重：
 ```
 minimize    w'Σw
 subject to  Σ_s w_s = 1        （满仓）
-            w_s ≥ 0             （不做空，我们的选择）
+            w_s ≥ 0             （Week 1 不做空；Week 2 起改为 -0.15 ≤ w_s ≤ 0.30）
             0.01 ≤ w_s ≤ 0.25   （10 只都持有，单票不超过 25%）
 ```
 
