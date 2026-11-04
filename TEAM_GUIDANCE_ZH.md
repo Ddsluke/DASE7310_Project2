@@ -33,7 +33,7 @@
 |---|---|
 | 股票池 | 9988、0066、1398、3988、0981、0005、1810、0016、1113、0700 |
 | 初始资本 | HKD 1,000,000，必须满仓（`Σw = 1`） |
-| 做空 | 官方允许；**我们组不做空** |
+| 做空 | **官方明确允许**（p.1：“short positions are permitted”）；我们组不做空 |
 | 周内策略 | Buy-and-hold，周内股数不变 |
 | 再平衡 | 第 2/3/4 周开始前各一次，**全程最多 3 次** |
 | 交易周 | 11/2–6、11/9–13、11/16–20、11/23–27 |
@@ -75,7 +75,7 @@ Lecture 1 syllabus p.12 也说：“The total available capital at the end of we
 | 权重和必须 = 1 吗？ | **是（隐含）**。PDF 没有单独写 `Σw=1`，但 “fully allocated” + `w=c/C` + `C=Σph`（没有现金项）意味着全部资本投到 10 只股票，`Σc=C`，所以 `Σw=1`。 | p.1–2 |
 | 可以空仓（全部现金）吗？ | **不可以**。“entire amount must be fully allocated across the 10 selected stocks”；`C_i` 只对股票市值求和，没有现金项。 | p.1–2 |
 | 可以某只股票权重为 0 吗？ | **没有明确禁止**。PDF 只说 “across the 10 selected stocks”，没有写每只必须 >0。数学上 `c_s=0` 是允许的；但字面“across the 10”可以理解为 10 只都应持有。我们组用 **1% 下限** 来避免歧义。 | p.1 |
-| 可以做空吗？ | **可以**。“short positions are permitted.” 做空时 `c_s` 和 `h_s` 为负，`Σw=1` 仍成立（净权重），但 gross exposure 可以 >1。我们组选择不做空。 | p.1 |
+| 可以做空吗？ | **可以，官方明确允许**。原文（p.1）：“This entire amount must be fully allocated across the 10 selected stocks; short positions are permitted.” 做空时 `c_s` 和 `h_s` 为负，`Σw=1` 仍成立（净权重），但 gross exposure 可以 >1。我们组选择不做空。 | p.1 |
 | 可以持有现金等再平衡吗？ | **不可以**。剩余资本 `C_i` 是股票市值之和；卖出后的钱要重新分配到股票，不留在现金。 | p.2 |
 | 可以只买 9 只吗？ | **字面上没有禁止，但“across the 10 selected stocks”建议 10 只都持有**。如果只买 9 只，风险是老师认为没有 fully allocate across the 10；1% 下限是最保守的做法。 | p.1 |
 

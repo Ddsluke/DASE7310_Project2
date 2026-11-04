@@ -351,7 +351,7 @@ cd D:\Backup\Documents\dase7310\DASE7310_GP2_Repo
 |---|---|---|
 | **Lecture 5** | Derivatives markets、forward/futures、hedging strategies | 唯一相关的是 **minimum variance hedge ratio** `h* = ρ σ_S / σ_F` 和 hedge effectiveness `e = ρ²`（slide 29–31）。这是“用期货对冲”的比率，**不是** GMV 组合。GP2 只允许 10 只股票，不能用 HSI 期货，所以不作为 benchmark；可以作为“potential improvement”提一句。 |
 | **Lecture 6** | Important interest rates、zero rates、bond pricing、forward rates、FRA | 和股票组合没有直接关系。唯一用到的是无风险利率 `r_f`；我们用 2% 的平坦利率。更精确的做法是用 HK 零息曲线（Lecture 6），但对 4 周组合影响是二阶的，可作为 improvement。 |
-| **Lecture 7** | Futures/forward prices、stock index futures、margin、options | 和 GP2 直接相关的是 **short selling**（slide 4）和 **stock index futures**（slide 18–21）。项目允许做空，但我们组选择不做；HSI 期货/期权不在允许的股票池里。可以在报告里引用 short-selling 的保证金/借券成本，解释为什么我们选择 long-only。 |
+| **Lecture 7** | Futures/forward prices、stock index futures、margin、options | 和 GP2 直接相关的是 **short selling**（slide 4）和 **stock index futures**（slide 18–21）。项目第 1 页明确写 “short positions are permitted”，但我们组选择不做；HSI 期货/期权不在允许的股票池里。可以在报告里引用 short-selling 的保证金/借券成本，解释为什么我们选择 long-only。 |
 
 **结论：**
 

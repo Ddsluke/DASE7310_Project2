@@ -25,7 +25,7 @@ submitted week; add a new file / variant instead.
 |---|---|
 | Stock pool | 9988, 0066, 1398, 3988, 0981, 0005, 1810, 0016, 1113, 0700 |
 | Initial capital | HKD 1,000,000, fully allocated (`sum_s w_s = 1`) |
-| Short selling | Permitted by the project; **not used by this group** |
+| Short selling | **Explicitly permitted** (“short positions are permitted”, p.1); **not used by this group** |
 | Holding period | Buy-and-hold within each trading week |
 | Rebalancing | Before each new week, max **3 adjustments** total (weeks 2, 3, 4) |
 | Trading weeks | Nov 2–6, Nov 9–13, Nov 16–20, Nov 23–27 |
