@@ -54,6 +54,40 @@
 | 周日 23:59 前 | 上传 `weeks/weekN/submission.xlsx` 到 Moodle；确认上传成功 |
 | 下周五收盘后 | `evaluate --week N` 记录实际收益 |
 
+### 1.3 官方口径：权重和、现金、零权重、做空
+
+原始 PDF 的原文（`Group-Project-2_2026.pdf` p.1–2）：
+
+> “This entire amount must be fully allocated across the 10 selected stocks; short positions are permitted.”
+>
+> `w_{s,i} = c_{s,i-1} / C_{i-1}`
+>
+> “where C_{i-1} is the total remaining capital at the end of week i−1, and c_{s,i-1} is the capital allocated to stock s...”
+>
+> `C_i = Σ_{s=1}^{10} p_{s,i} h_{s,i}`
+
+Lecture 1 syllabus p.12 也说：“The total available capital at the end of week i, C_i, is the sum of the value of all stocks in the portfolio.” 同样没有现金项。
+
+逐条解读：
+
+| 问题 | 官方口径 | 依据 |
+|---|---|---|
+| 权重和必须 = 1 吗？ | **是（隐含）**。PDF 没有单独写 `Σw=1`，但 “fully allocated” + `w=c/C` + `C=Σph`（没有现金项）意味着全部资本投到 10 只股票，`Σc=C`，所以 `Σw=1`。 | p.1–2 |
+| 可以空仓（全部现金）吗？ | **不可以**。“entire amount must be fully allocated across the 10 selected stocks”；`C_i` 只对股票市值求和，没有现金项。 | p.1–2 |
+| 可以某只股票权重为 0 吗？ | **没有明确禁止**。PDF 只说 “across the 10 selected stocks”，没有写每只必须 >0。数学上 `c_s=0` 是允许的；但字面“across the 10”可以理解为 10 只都应持有。我们组用 **1% 下限** 来避免歧义。 | p.1 |
+| 可以做空吗？ | **可以**。“short positions are permitted.” 做空时 `c_s` 和 `h_s` 为负，`Σw=1` 仍成立（净权重），但 gross exposure 可以 >1。我们组选择不做空。 | p.1 |
+| 可以持有现金等再平衡吗？ | **不可以**。剩余资本 `C_i` 是股票市值之和；卖出后的钱要重新分配到股票，不留在现金。 | p.2 |
+| 可以只买 9 只吗？ | **字面上没有禁止，但“across the 10 selected stocks”建议 10 只都持有**。如果只买 9 只，风险是老师认为没有 fully allocate across the 10；1% 下限是最保守的做法。 | p.1 |
+
+> **严谨说明**：PDF 没有出现 “cash” 这个词，也没有单独写 `Σw = 1`。上面的“是/不可以”是从 “fully allocated” + `w=c/C` + `C=Σph`（无现金项）推出来的**官方口径的严格解读**，不是逐字原文。如果老师口头允许现金，公式需要额外加现金项；但按 PDF 的公式，现金不在 `C_i` 里。
+
+**结论**：
+
+- 满仓、`Σw=1`、无现金，是官方口径；
+- 零权重（单只）没有被明确禁止，但有歧义；我们的 1% 下限是保守解释，报告里要写明这是我们的 implementation constraint；
+- 做空官方允许，我们组不做；
+- 现金/空仓（整个组合）不允许。
+
 ---
 
 ## 2. 数据口径（最容易错的地方）
