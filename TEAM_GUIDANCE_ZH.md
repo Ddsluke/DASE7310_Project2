@@ -88,6 +88,8 @@ Lecture 1 syllabus p.12 也说：“The total available capital at the end of we
 - 做空官方允许，我们组不做；
 - 现金/空仓（整个组合）不允许。
 
+> **如果决定使用做空**：代码已支持 `--floor` / `--cap`，例如 `build --week 2 ... --strategy gmv --floor -0.15 --cap 0.30`。Week 1 已提交的 long-only **不要用 11/2–11/4 的涨跌回填**；做空从 Week 2（11/6 截点）开始最干净。候选文件：`weeks/week1/submission_short_gmv_onesheet.xlsx`。
+
 ---
 
 ## 2. 数据口径（最容易错的地方）

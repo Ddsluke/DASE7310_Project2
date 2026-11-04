@@ -348,25 +348,25 @@ def mv_weights(ret: pd.DataFrame, mu: pd.Series, lam: float = 10.0,
 
 def target_weights(ret: pd.DataFrame, strategy: str, k: float = 2.0,
                    te: float = 0.10, lam: float = 10.0, rf: float = 0.02,
-                   premium: float = 0.05,
+                   premium: float = 0.05, floor: float = 0.01, cap: float = 0.25,
                    idx_ret: pd.DataFrame | None = None) -> tuple[pd.Series, pd.Series | None]:
     if strategy == "ew":
         return pd.Series(1 / len(STOCKS), index=STOCKS), None
     if strategy == "gmv":
-        return gmv_weights(ret), None
+        return gmv_weights(ret, floor=floor, cap=cap), None
     if strategy == "tangency":
-        return tangency_weights(ret, rf=rf), None
+        return tangency_weights(ret, cap=cap, rf=rf), None
     if strategy == "top4":
         return top4_weights(ret), composite_signal(ret)
     if strategy == "capm":
         if idx_ret is None:
             raise ValueError("capm strategy requires HSI index returns")
         mu, beta = capm_mu(ret, idx_ret, rf=rf, premium=premium)
-        return mv_weights(ret, mu, lam=lam), beta
+        return mv_weights(ret, mu, lam=lam, floor=floor, cap=cap), beta
     if strategy == "signal":
         mu = composite_signal(ret) * 0.02
-        return mv_weights(ret, mu, lam=lam), composite_signal(ret)
-    return tilt_weights(ret, te=te, k=k)
+        return mv_weights(ret, mu, lam=lam, floor=floor, cap=cap), composite_signal(ret)
+    return tilt_weights(ret, te=te, k=k, long_cap=cap, short_cap=floor)
 
 
 # ----------------------------------------------------------------------------- build
@@ -403,6 +403,7 @@ def cumulative_active(week: int) -> float | None:
 
 def build(week: int, cutoff: str, strategy: str = "gmv", k: float = 2.0, te: float = 0.10,
           lam: float = 10.0, rf: float = 0.02, premium: float = 0.05,
+          floor: float = 0.01, cap: float = 0.25,
           variant: str | None = None):
     raw, hfq, ret, idx, meta = load_data()
     px = prices_asof(raw, cutoff)
@@ -417,7 +418,7 @@ def build(week: int, cutoff: str, strategy: str = "gmv", k: float = 2.0, te: flo
             override = f"cumulative active return {ca:+.2%} < -5pp: k cut from {k} to 1.0"
 
     w, aux = target_weights(ret_upto, strategy, k_effective, te, lam=lam, rf=rf,
-                            premium=premium, idx_ret=idx)
+                            premium=premium, floor=floor, cap=cap, idx_ret=idx)
     hist_cov = ret_upto.dropna().tail(104)
     cov_shrunk = shrink_cov(hist_cov, 104)
     cov_sample = hist_cov.cov().values * 52
@@ -460,6 +461,8 @@ def build(week: int, cutoff: str, strategy: str = "gmv", k: float = 2.0, te: flo
         "k_requested": (k if strategy == "tilt" else None),
         "k_override_reason": override,
         "tracking_error_budget": te if strategy == "tilt" else None,
+        "floor": floor,
+        "cap": cap,
         "lam": lam if strategy in ("capm", "signal") else None,
         "rf": rf if strategy == "capm" else None,
         "market_premium": premium if strategy == "capm" else None,
@@ -654,10 +657,14 @@ def main():
     p.add_argument("--lam", type=float, default=10.0)
     p.add_argument("--rf", type=float, default=0.02)
     p.add_argument("--premium", type=float, default=0.05)
+    p.add_argument("--floor", type=float, default=0.01,
+                   help="lower weight bound; set negative to allow shorts (e.g. -0.15)")
+    p.add_argument("--cap", type=float, default=0.25,
+                   help="upper weight bound (e.g. 0.40 for long-short)")
     p.add_argument("--variant", default=None)
     p.set_defaults(func=lambda a: build(a.week, a.cutoff or WEEK_DATES[str(a.week)]["cutoff"],
                                         a.strategy, a.k, a.te, a.lam, a.rf, a.premium,
-                                        a.variant))
+                                        a.floor, a.cap, a.variant))
 
     p = sub.add_parser("evaluate")
     p.add_argument("--week", type=int, required=True)

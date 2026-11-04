@@ -93,6 +93,19 @@ cd D:\Backup\Documents\dase7310\DASE7310_GP2_Repo
 Get-Content weeks\week2\params.json
 ```
 
+**如果决定使用做空（官方允许）**：
+
+```powershell
+# short-enabled GMV（-15% 下限 / 30% 上限）
+& $py portfolio.py build --week 2 --cutoff 2026-11-06 --strategy gmv --floor -0.15 --cap 0.30
+
+# short-enabled CAPM / Signal
+& $py portfolio.py build --week 2 --cutoff 2026-11-06 --strategy capm --lam 15 --floor -0.15 --cap 0.40
+& $py portfolio.py build --week 2 --cutoff 2026-11-06 --strategy signal --lam 8 --floor -0.15 --cap 0.40
+```
+
+> **注意**：Week 1 已提交的 long-only 不要用 11/2–11/4 的实际涨跌回填；做空从 Week 2 开始最干净。
+
 提交文件：
 
 - **Moodle**：`weeks\week2\submission.xlsx`
