@@ -309,6 +309,22 @@ def top4_weights(ret: pd.DataFrame, core: float = 0.5) -> pd.Series:
     return w
 
 
+def top4_short_weights(ret: pd.DataFrame, core: float = 0.20,
+                       short_size: float = 0.03) -> pd.Series:
+    """Long the top-4 signal names, short the bottom-3 at `short_size` each,
+    keep a small equal-weight core in the rest. Sum = 1; gross ~1.06."""
+    sig = composite_signal(ret)
+    top4 = sig.nlargest(4).index
+    bot3 = sig.nsmallest(3).index
+    w = pd.Series(core / len(STOCKS), index=STOCKS)
+    w[top4] += (1 - core) / 4
+    for s in bot3:
+        w[s] -= short_size
+    for s in top4:
+        w[s] += short_size * len(bot3) / 4
+    return w
+
+
 def capm_beta(ret: pd.DataFrame, idx_ret: pd.DataFrame) -> pd.Series:
     """用 HSI 周收益回归估计每只股票的 beta（Lecture 4）。"""
     h = ret.dropna()
@@ -358,6 +374,8 @@ def target_weights(ret: pd.DataFrame, strategy: str, k: float = 2.0,
         return tangency_weights(ret, cap=cap, rf=rf), None
     if strategy == "top4":
         return top4_weights(ret), composite_signal(ret)
+    if strategy == "top4_short":
+        return top4_short_weights(ret), composite_signal(ret)
     if strategy == "capm":
         if idx_ret is None:
             raise ValueError("capm strategy requires HSI index returns")
@@ -463,6 +481,14 @@ def build(week: int, cutoff: str, strategy: str = "gmv", k: float = 2.0, te: flo
         "tracking_error_budget": te if strategy == "tilt" else None,
         "floor": floor,
         "cap": cap,
+        "max_weight_actual": round(float(w.max()), 6),
+        "min_weight_actual": round(float(w.min()), 6),
+        "cap_note": (
+            "cap/floor not used for top4/top4_short/ew; weights are fixed by the strategy"
+            if strategy in ("top4", "top4_short", "ew")
+            else ("long cap; floor is the short cap" if strategy == "tilt"
+                  else f"per-name bounds [{floor}, {cap}]")
+        ),
         "lam": lam if strategy in ("capm", "signal") else None,
         "rf": rf if strategy == "capm" else None,
         "market_premium": premium if strategy == "capm" else None,
@@ -488,7 +514,48 @@ def build(week: int, cutoff: str, strategy: str = "gmv", k: float = 2.0, te: flo
     (out / f"params{suffix}.json").write_text(json.dumps(params, ensure_ascii=False, indent=2),
                                               encoding="utf-8")
 
-    with pd.ExcelWriter(out / f"submission{suffix}.xlsx", engine="openpyxl") as xw:
+    # --- one-sheet Moodle submission (matches the Week 1 format fix) ---
+    sub = df[["stock_code", "stock_name", "price", "weight", "capital", "shares_rounded"]].copy()
+    sub.columns = ["Stock Code", "Stock Name", "Price (HKD)", "Weight",
+                   "Capital Allocated (HKD)", "Number of Shares"]
+    sub["Weight"] = sub["Weight"].round(6)
+    sub["Capital Allocated (HKD)"] = sub["Capital Allocated (HKD)"].round(2)
+    sub.to_csv(out / f"submission{suffix}.csv", index=False)
+
+    from openpyxl import Workbook
+    from openpyxl.styles import Alignment, Font, PatternFill
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Portfolio"
+    ws["A1"] = "Week"; ws["B1"] = week
+    ws["A2"] = "Cutoff"; ws["B2"] = params["cutoff"]
+    ws["A3"] = "Total Remaining Capital (HKD)"; ws["B3"] = round(capital_prev, 2)
+    r0 = 5
+    for j, h in enumerate(list(sub.columns), 1):
+        c = ws.cell(row=r0, column=j, value=h)
+        c.font = Font(bold=True)
+        c.fill = PatternFill("solid", fgColor="D9E1F2")
+        c.alignment = Alignment(horizontal="center")
+    for i, (_, row) in enumerate(sub.iterrows()):
+        r = r0 + 1 + i
+        ws.cell(row=r, column=1, value=str(row["Stock Code"])).number_format = "@"
+        ws.cell(row=r, column=2, value=row["Stock Name"])
+        ws.cell(row=r, column=3, value=float(row["Price (HKD)"])).number_format = "#,##0.0000"
+        ws.cell(row=r, column=4, value=float(row["Weight"])).number_format = "0.0000%"
+        ws.cell(row=r, column=5, value=float(row["Capital Allocated (HKD)"])).number_format = "#,##0.00"
+        ws.cell(row=r, column=6, value=float(row["Number of Shares"])).number_format = "#,##0.000000"
+    rtot = r0 + 1 + len(sub)
+    ws.cell(row=rtot, column=1, value="Total").font = Font(bold=True)
+    ws.cell(row=rtot, column=4, value=float(sub["Weight"].sum())).number_format = "0.0000%"
+    ws.cell(row=rtot, column=5,
+            value=round(float(sub["Capital Allocated (HKD)"].sum()), 2)).number_format = "#,##0.00"
+    for col, width in zip("ABCDEF", [14, 28, 14, 14, 24, 18]):
+        ws.column_dimensions[col].width = width
+    wb.save(out / f"submission{suffix}.xlsx")
+
+    # --- multi-sheet internal workbook (kept for details / audit) ---
+    with pd.ExcelWriter(out / f"submission_full{suffix}.xlsx", engine="openpyxl") as xw:
         summary = pd.DataFrame({
             "Item": ["Week", "Cutoff (valuation date)", "Trading week end", "Strategy",
                      "Initial / remaining capital (HKD)", "Capital after share rounding (HKD)",
@@ -499,12 +566,6 @@ def build(week: int, cutoff: str, strategy: str = "gmv", k: float = 2.0, te: flo
                       params["n_short"]],
         })
         summary.to_excel(xw, sheet_name="Summary", index=False)
-        sub = df[["stock_code", "stock_name", "price", "weight", "capital", "shares_rounded"]].copy()
-        sub.columns = ["Stock Code", "Stock Name", "Price (HKD)", "Weight",
-                       "Capital Allocated (HKD)", "Number of Shares"]
-        sub["Weight"] = sub["Weight"].round(6)
-        sub["Capital Allocated (HKD)"] = sub["Capital Allocated (HKD)"].round(2)
-        sub.to_csv(out / f"submission{suffix}.csv", index=False)
         sub.to_excel(xw, sheet_name="Submission", index=False)
         df.to_excel(xw, sheet_name="Details", index=False)
         notes = pd.DataFrame({
@@ -651,7 +712,7 @@ def main():
     p.add_argument("--week", type=int, required=True)
     p.add_argument("--cutoff", default=None)
     p.add_argument("--strategy", choices=["gmv", "tilt", "ew", "tangency", "top4",
-                                          "capm", "signal"], default="gmv")
+                                          "top4_short", "capm", "signal"], default="gmv")
     p.add_argument("--k", type=float, default=2.0)
     p.add_argument("--te", type=float, default=0.10)
     p.add_argument("--lam", type=float, default=10.0)

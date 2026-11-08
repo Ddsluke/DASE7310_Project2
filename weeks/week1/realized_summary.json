@@ -1,0 +1,14 @@
+{
+  "week": 1,
+  "cutoff": "2026-10-30",
+  "end": "2026-11-06",
+  "capital_start": 1000000.0000501531,
+  "capital_end": 1021677.1692132218,
+  "return": 0.02167716916198148,
+  "ew_return": 0.05735367097661216,
+  "active_return": -0.03567650181463068,
+  "hit_stocks": 9,
+  "n_stocks": 10,
+  "worst_stock": "3988",
+  "best_stock": "0066"
+}
