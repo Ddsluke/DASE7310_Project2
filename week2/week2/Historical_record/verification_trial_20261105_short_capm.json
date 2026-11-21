@@ -1,0 +1,49 @@
+{
+  "week": 2,
+  "variant": "trial_20261105_short_capm",
+  "trial": true,
+  "submission_ready": false,
+  "cutoff": "2026-11-06",
+  "actual_price_date": "2026-10-30",
+  "n_short": 2,
+  "shorting_allowed": true,
+  "checks": [
+    {
+      "item": "cutoff",
+      "status": "PASS",
+      "value": "2026-11-06",
+      "detail": "matches requested cutoff"
+    },
+    {
+      "item": "capital_prev",
+      "status": "PASS",
+      "value": 1000000.0,
+      "detail": "previous portfolio shares x raw cutoff prices; expected=1000000.00, diff=0.000000"
+    },
+    {
+      "item": "sum_weights",
+      "status": "PASS",
+      "value": 1.0,
+      "detail": "sum of ten portfolio weights"
+    },
+    {
+      "item": "ten_rows",
+      "status": "PASS",
+      "value": 10,
+      "detail": "unique=10; missing=[]"
+    },
+    {
+      "item": "shares_x_price",
+      "status": "PASS",
+      "value": 1000000.0,
+      "detail": "portfolio.csv shares_rounded x raw price; diff=0.000000"
+    },
+    {
+      "item": "Moodle_upload",
+      "status": "N/A",
+      "value": "N/A",
+      "detail": "trial variant; do not upload"
+    }
+  ],
+  "written_to": "weeks\\week2\\verification_trial_20261105_short_capm.json"
+}
